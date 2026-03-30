@@ -1,0 +1,105 @@
+/* assets/css/main.css */
+
+/* 1. 디자인 시스템 변수 정의 (자바의 상숫값과 비슷합니다) */
+:root {
+    --color-red: #e63946;
+    --color-blue: #4895ef;
+    --color-miss: #999999;
+    --color-border: #eeeeee;
+    --font-main: 'Inter', sans-serif;
+}
+
+/* 2. 공통 마커 스타일 */
+.marker {
+    pointer-events: none;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.marker.made {
+    fill: none;
+    stroke-width: 2px;
+}
+
+.marker.made.red { stroke: var(--color-red); }
+.marker.made.blue { stroke: var(--color-blue); }
+
+.marker.miss {
+    fill: var(--color-miss);
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+/* 3. 통계 및 레이아웃 공통 클래스 */
+.text-large { font-size: 2rem; font-weight: 800; color: #111; }
+.text-small { font-size: 1.2rem; color: #666; font-weight: 500; }
+
+/* 확률 */
+.stat-box { display: flex; align-items: baseline; gap: 8px; font-family: 'Inter', sans-serif; }
+.percent { font-size: 2rem; font-weight: 800; color: #111; }
+.count { font-size: 1.2rem; color: #666; font-weight: 500; }
+
+/* 최근 기록 리스트 */
+ .log-section {
+     width: 100%;
+     max-width: 400px;
+     background: #f9f9f9;
+     padding: 15px;
+     border-radius: 8px;
+     border: 1px solid #eee;
+     margin-top: 30px;
+ }
+
+h3 { margin-top: 0; font-size: 1.1rem; color: #333; }
+
+.scroll-area {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.empty-msg {
+    color: #999;
+    font-size: 0.9rem;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.log-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+/* assets/css/main.css에 정의한 변수 사용 */
+.made-bg { background-color: var(--color-red, #e63946); }
+.miss-bg { background-color: var(--color-miss, #999); }
+
+.btn-group button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.btn-group button:hover { background: #f0f0f0; }
+
+.del-btn {
+    color: #e63946;
+    border-color: #fca5a5 !important;
+}
