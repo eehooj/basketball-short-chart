@@ -1,8 +1,15 @@
 import { COURT_CONFIG } from '~/utils/constants'
 
+export interface Shot {
+    id: number;
+    x: number;
+    y: number;
+    type: 'made' | 'miss';
+}
+
 export const useShotChart = () => {
-    const leftShots = ref([])
-    const rightShots = ref([])
+    const leftShots = ref<Shot[]>([])
+    const rightShots = ref<Shot[]>([])
 
     // 초기화 (LocalStorage 로드)
     onMounted(() => {
@@ -36,9 +43,20 @@ export const useShotChart = () => {
         return { total, made, rate: total > 0 ? Math.round((made / total) * 100) : 0 }
     }
 
+    const resetData = () => {
+        if (confirm('모든 슛 기록을 초기화하시겠습니까?')) {
+            leftShots.value = []
+            rightShots.value = []
+            // 선택사항: 특정 키만 삭제하거나 전체 삭제
+            localStorage.removeItem('leftShots')
+            localStorage.removeItem('rightShots')
+        }
+    }
+
     return {
         leftShots, rightShots,
         addShot, removeShot, toggleStatus,
+        resetData,
         leftStats: computed(() => getStats(leftShots.value)),
         rightStats: computed(() => getStats(rightShots.value))
     }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Composable에서 로직을 가져옵니다. (자동 import)
-const { leftShots, rightShots, addShot, removeShot, toggleStatus, leftStats, rightStats } = useShotChart()
+const { leftShots, rightShots, addShot, removeShot, toggleStatus, leftStats, rightStats, resetData } = useShotChart()
 
 // 최근 기록 리스트용 계산
 const recentLogs = computed(() => {
@@ -20,6 +20,7 @@ const recentLogs = computed(() => {
 
     <div class="footer-stats">
       <ShotStats :stats="leftStats" />
+      <button class="reset-btn" @click="resetData">전체 초기화</button>
       <ShotStats :stats="rightStats" isRight />
     </div>
 
