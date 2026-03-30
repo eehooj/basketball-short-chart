@@ -62,9 +62,3 @@ const onCourtClick = (event: MouseEvent) => {
     <p class="hint">팁: 코트 위 마커를 클릭하면 상태가 변합니다.</p>
   </div>
 </template>
-
-<style scoped>
-/* 이전 코드의 스타일을 그대로 가져왔습니다. */
-.court-wrapper { width: 100%; max-width: 900px; border: 1px solid #eee; position: relative; margin-bottom: 20px; }
-.main-court { width: 100%; height: auto; cursor: crosshair; display: block; }
-</style>

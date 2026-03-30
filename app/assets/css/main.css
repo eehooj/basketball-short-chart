@@ -53,6 +53,10 @@
 
 h3 { margin-top: 0; font-size: 1.1rem; color: #333; }
 
+/* 코트 */
+.court-wrapper { width: 100%; max-width: 900px; border: 1px solid #eee; position: relative; margin-bottom: 20px; }
+.main-court { width: 100%; height: auto; cursor: crosshair; display: block; }
+
 .scroll-area {
     max-height: 300px;
     overflow-y: auto;
