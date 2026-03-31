@@ -21,8 +21,8 @@ const emit = defineEmits(['toggle', 'remove'])
 
         <div class="shot-info">
           <span class="zone-tag">{{ s.zone || '미분류' }}</span>
+          <span class="player-tag" v-if="s.playerName"> | {{ s.playerName }}</span>
         </div>
-
         <div class="btn-group">
           <button @click="emit('toggle', s)">전환</button>
           <button @click="emit('remove', s.id)" class="del-btn">삭제</button>

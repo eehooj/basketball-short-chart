@@ -5,6 +5,8 @@ export interface Shot {
     x: number;
     y: number;
     type: 'made' | 'miss';
+    playerName?: string;
+    newPlayers?: string;
     distance?: number;
     is3Point?: boolean;
     zone?: string;
@@ -13,20 +15,36 @@ export interface Shot {
 export const useShotChart = () => {
     const leftShots = ref<Shot[]>([])
     const rightShots = ref<Shot[]>([])
+    const players = ref<string[]>([])
 
     // 초기화 (LocalStorage 로드)
     onMounted(() => {
         leftShots.value = JSON.parse(localStorage.getItem('leftShots') || '[]')
         rightShots.value = JSON.parse(localStorage.getItem('rightShots') || '[]')
+        const savedPlayers = localStorage.getItem('playerList')
+        players.value = savedPlayers ? JSON.parse(savedPlayers) : ['선수1', '선수2']
     })
 
     // 자동 저장
-    watch([leftShots, rightShots], ([newLeft, newRight]) => {
+    watch([leftShots, rightShots, players],
+        ([newLeft, newRight, newPlayers]) => {
         localStorage.setItem('leftShots', JSON.stringify(newLeft))
         localStorage.setItem('rightShots', JSON.stringify(newRight))
+        localStorage.setItem('playerList', JSON.stringify(newPlayers))
     }, { deep: true })
 
-    const addShot = (x: number, y: number, isMade: boolean = true) => {
+    const addPlayer = (name: string) => {
+        const trimmedName = name.trim()
+        if (trimmedName && !players.value.includes(trimmedName)) {
+            players.value.push(trimmedName)
+        }
+    }
+
+    const removePlayer = (name: string) => {
+        players.value = players.value.filter(p => p !== name)
+    }
+
+    const addShot = (x: number, y: number, isMade: boolean = true, playerName: string = '익명') => {
         const isLeft = x < COURT_CONFIG.HALF_WIDTH;
         const target = isLeft ? leftShots : rightShots;
 
@@ -74,13 +92,14 @@ export const useShotChart = () => {
             id: Date.now(),
             x, y,
             type: isMade ? 'made' : 'miss',
+            playerName: playerName, // 🚩 추가: 현재 선택된 선수 이름 저장
             zone: zoneName,
             distance: Math.round(distance),
             is3Point: is3Point
         });
 
         // 디버깅용 로그
-        console.log(`[판정결과] ${zoneName} | dx:${Math.round(dx)} dy:${Math.round(dy)} dist:${Math.round(distance)}`);
+        console.log(`[${playerName}] ${zoneName} | dist:${Math.round(distance)}`);
     }
 
     const removeShot = (id: number) => {
@@ -128,8 +147,6 @@ export const useShotChart = () => {
         }
     }
 
-
-
     return {
         leftShots, rightShots,
         addShot, removeShot, toggleStatus,
@@ -137,6 +154,9 @@ export const useShotChart = () => {
         leftZoneStats: computed(() => calculateZoneStats(leftShots.value)),
         rightZoneStats: computed(() => calculateZoneStats(rightShots.value)),
         leftStats: computed(() => getStats(leftShots.value)),
-        rightStats: computed(() => getStats(rightShots.value))
+        rightStats: computed(() => getStats(rightShots.value)),
+        players,
+        addPlayer,
+        removePlayer,
     }
 }
