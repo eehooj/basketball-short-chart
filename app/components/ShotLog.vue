@@ -2,10 +2,15 @@
 // 부모(app.vue)로부터 최근 슛 목록을 받습니다.
 defineProps<{
   logs: any[]
+  activeId: number | null
 }>()
 
 // 부모에게 수정/삭제 이벤트를 보냅니다.
-const emit = defineEmits(['toggle', 'remove'])
+const emit = defineEmits<{
+  (e: 'toggle', shot: any): void
+  (e: 'remove', id: number): void
+  (e: 'highlight', id: number): void // 이 줄을 추가하세요!
+}>()
 </script>
 
 <template>
@@ -16,7 +21,14 @@ const emit = defineEmits(['toggle', 'remove'])
         기록된 슛이 없습니다.
       </div>
 
-      <div v-for="s in logs" :key="s.id" class="log-item">
+      <div
+          v-for="s in logs"
+          :key="s.id"
+          class="log-item"
+          :class="{ 'is-active': activeId === s.id }"
+          @click="emit('highlight', s.id)"
+          style="cursor: pointer;"
+      >
         <span :class="['status-dot', s.type === 'made' ? 'made-bg' : 'miss-bg']"></span>
 
         <div class="shot-info">

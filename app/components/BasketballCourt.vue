@@ -5,6 +5,7 @@ import { COURT_CONFIG } from '~/utils/constants'
 defineProps<{
   leftShots: any[]
   rightShots: any[]
+  activeId: number | null
 }>()
 
 // 부모에게 클릭 이벤트를 전달합니다.
@@ -50,13 +51,33 @@ const onCourtClick = (event: MouseEvent) => {
       </g>
 
       <g v-for="s in leftShots" :key="s.id">
-        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="4.5" class="marker made red" />
-        <text v-else :x="s.x" :y="s.y" dy=".35em" class="marker miss">✕</text>
+        <circle
+            v-if="s.type==='made'"
+            :cx="s.x" :cy="s.y" r="5"
+            class="marker made red"
+            :class="{ 'highlighted': activeId === s.id }"
+        />
+        <text
+            v-else
+            :x="s.x" :y="s.y" dy=".35em"
+            class="marker miss"
+            :class="{ 'highlighted-text': activeId === s.id }"
+        >✕</text>
       </g>
 
       <g v-for="s in rightShots" :key="s.id">
-        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="4.5" class="marker made blue" />
-        <text v-else :x="s.x" :y="s.y" dy=".35em" class="marker miss">✕</text>
+        <circle
+            v-if="s.type==='made'"
+            :cx="s.x" :cy="s.y" r="4.5"
+            class="marker made blue"
+            :class="{ 'highlighted': activeId === s.id }"
+        />
+        <text
+            v-else
+            :x="s.x" :y="s.y" dy=".35em"
+            class="marker miss"
+            :class="{ 'highlighted-text': activeId === s.id }"
+        >✕</text>
       </g>
     </svg>
   </div>

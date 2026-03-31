@@ -390,3 +390,23 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
         max-width: 600px;
     }
 }
+
+.marker.highlighted {
+    stroke: var(--color-green) !important; /* 검정색 테두리 */
+    stroke-width: 3px !important;
+    r: 7px; /* 크기도 살짝 키움 */
+    transition: all 0.2s;
+}
+
+.marker.highlighted-text {
+    fill: #000 !important;
+    font-size: 20px !important; /* X 표시 크게 */
+    font-weight: 900;
+    transition: all 0.2s;
+}
+
+/* 로그 목록 강조 (선택 사항: 클릭했다는 느낌을 줌) */
+.log-item.is-active {
+    border: 2px solid var(--color-green) !important;
+    background-color: #f0fff4 !important;
+}

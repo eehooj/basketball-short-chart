@@ -19,11 +19,10 @@ const recentLogs = computed(() => {
 })
 
 const isStatsVisible = ref(false)
-
 const currentPlayer = ref('');      // 현재 슛을 기록할 선수
 const newPlayerName = ref('');
 const filterPlayer = ref('전체')
-
+const activeLogId = ref<number | null>(null);
 
 const toggleStats = () => isStatsVisible.value = !isStatsVisible.value
 
@@ -44,6 +43,11 @@ const getStats = (data: any[]) => {
   return { total, made, rate: total > 0 ? Math.round((made / total) * 100) : 0 }
 }
 
+// 로그 클릭 시 호출될 함수
+const handleHighlightShot = (id: number) => {
+  // 이미 선택된 걸 다시 누르면 강조 해제, 아니면 강조
+  activeLogId.value = activeLogId.value === id ? null : id;
+};
 
 // 3. 구역별 상세 통계(모달용) 필터링
 const displayLeftZoneStats = computed(() => calculateZoneStats(filteredLeftShots.value))
@@ -71,6 +75,7 @@ const handleRecordShot = (x: number, y: number) => {
     return;
   }
   addShot(x, y, true, currentPlayer.value);
+  activeLogId.value = null; // 새 슛을 쏘면 강조 해제
 };
 
 const handleResetPlayers = () => {
@@ -115,6 +120,7 @@ const handleResetPlayers = () => {
     <BasketballCourt
         :leftShots="filteredLeftShots"
         :rightShots="filteredRightShots"
+        :activeId="activeLogId"
         @record="handleRecordShot"
     />
 
@@ -129,8 +135,10 @@ const handleResetPlayers = () => {
     <div class="bottom-content-area">
       <ShotLog
           :logs="recentLogs"
+          :activeId="activeLogId"
           @toggle="toggleStatus"
           @remove="removeShot"
+          @highlight="handleHighlightShot"
       />
 
       <div class="player-management">
