@@ -91,7 +91,6 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 /* 1. 최근 기록 */
 .shot-tracker-page .log-section {
     flex: 0 0 350px;                 /* 가로 공간 분할 */
-    margin-top: 0px !important; /* 컨테이너 내부에 있으므로 상단 마진 제거 */
     background: #fdfdfd;
     padding: 20px;
     border-radius: 16px;
