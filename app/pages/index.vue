@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue' // ref가 빠졌다면 추가
+import { computed, ref } from 'vue'
+import ShotStats from "../components/ShotStats.vue";
+import BasketballCourt from "../components/BasketballCourt.vue";
+import ShotStatsModal from "../components/ShotStatsModal.vue";
+import ShotLog from "../components/ShotLog.vue"; // ref가 빠졌다면 추가
 
 const {
   leftShots, rightShots, addShot, removeShot,
@@ -130,19 +134,22 @@ const handleResetPlayers = () => {
       />
 
       <div class="player-management">
-        <h3>선수 관리</h3>
+        <div class="management-header">
+          <div class="left-group">
+            <h3>선수</h3>
+            <div class="current-shooter-info">
+              현재 선택: <strong>{{ currentPlayer || '-' }}</strong>
+            </div>
+          </div>
 
-        <div class="current-shooter-info">
-          현재 슈터: <strong>{{ currentPlayer || '선수를 선택하세요' }}</strong>
-        </div>
-
-        <div class="add-player">
-          <input
-              v-model="newPlayerName"
-              placeholder="선수 이름 입력"
-              @keyup.enter="handleAddPlayer"
-          />
-          <button @click="handleAddPlayer">추가</button>
+          <div class="add-player">
+            <input
+                v-model="newPlayerName"
+                placeholder="이름 입력"
+                @keyup.enter="handleAddPlayer"
+            />
+            <button @click="handleAddPlayer">추가</button>
+          </div>
         </div>
 
         <div class="player-list">

@@ -23,7 +23,7 @@ export const useShotChart = () => {
         leftShots.value = JSON.parse(localStorage.getItem('leftShots') || '[]')
         rightShots.value = JSON.parse(localStorage.getItem('rightShots') || '[]')
         const savedPlayers = localStorage.getItem('playerList')
-        players.value = savedPlayers ? JSON.parse(savedPlayers) : ['선수1', '선수2']
+        players.value = savedPlayers ? JSON.parse(savedPlayers) : ['']
     })
 
     // 자동 저장

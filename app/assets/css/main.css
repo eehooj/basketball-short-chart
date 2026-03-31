@@ -24,6 +24,7 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 /* 🚩 상단 컨트롤 바 (버튼 + 통계) */
 .top-controls-row {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center; /* 🚩 세로 중앙 정렬의 핵심 */
     width: 100%;
@@ -50,6 +51,21 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     align-items: center;
     line-height: 1;
     transition: 0.2s;
+}
+
+.reset-players-btn {
+    background-color: #f4f4f4;
+    color: #333;
+    border: 1px solid #ddd;
+    height: 38px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.reset-players-btn:hover {
+    background-color: #e0e0e0;
 }
 
 .reset-btn { background: #f1f1f1; color: #666; }
@@ -92,7 +108,7 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 .shot-tracker-page .log-section {
     flex: 0 0 350px;                 /* 가로 공간 분할 */
     background: #fdfdfd;
-    padding: 20px;
+    padding: 15px;
     border-radius: 16px;
     border: 1px solid #eee;
     display: flex;
@@ -208,54 +224,71 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     display: flex !important;
     flex-direction: row !important; /* 강제로 가로 방향 설정 */
     justify-content: center;
-    align-items: flex-start;
-    gap: 20px;               /* 두 박스 사이의 간격 */
-    width: 150%;
-    max-width: 1000px;        /* 코트 너비와 일치 */
-    margin: 30px auto;
+    align-items: stretch;
+    gap: 15px;               /* 두 박스 사이의 간격 */
+    width: 100%;
+    max-width: 900px;        /* 코트 너비와 일치 */
+    margin: 20px auto;
 }
 
 .player-management {
     flex: 0 0 350px;
     background: #fdfdfd;     /* 로그 섹션과 동일한 배경 */
-    padding: 20px;
     border-radius: 16px;     /* 동일한 라운딩 */
     border: 1px solid #eee;  /* 동일한 테두리 */
+    padding: 0 20px 10px 20px;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.management-header {
+    display: flex;
+    align-items: center;       /* 세로 가운데 정렬 */
+    justify-content: space-between; /* 양 끝으로 배치 (원치 않으면 삭제) */
+}
+
+.left-group {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap; /* 줄바꿈 방지 */
+    padding-right: 10px;
+    flex-shrink: 0; /* 공간이 좁아져도 줄어들지 않음 */
 }
 
 .player-management h3 {
-    margin: 0 0 15px 0 !important;
     font-size: 1.2rem;
     color: #333;
     font-weight: 800;
+    white-space: nowrap;
+    line-height: 1;
 }
 
 /* 현재 슈터 정보 */
 .current-shooter-info {
-    margin-bottom: 15px;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     color: #666;
-    padding-bottom: 10px;
-    border-bottom: 1px dashed #eee;
+    line-height: 1;
 }
 
 /* 선수 추가 입력창 */
 .add-player {
     display: flex;
     gap: 8px;
-    margin-bottom: 15px;
+    flex: none; /* 남는 공간을 차지하지 않고 자기 크기만 유지 */
 }
 
 .add-player input {
-    flex: 1;
+    width: 100px;
+    height: 10px;
     padding: 8px 12px;
+    font-size: 0.85rem;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: 6px;
 }
 
 .add-player button {
-    padding: 0 12px;
+    padding: 0 10px;
     background: #333;
     color: white;
     border: none;
@@ -347,16 +380,13 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     outline: none;
 }
 
-.reset-players-btn {
-    background-color: #f4f4f4;
-    color: #333;
-    border: 1px solid #ddd;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.reset-players-btn:hover {
-    background-color: #e0e0e0;
+@media (max-width: 850px) {
+    .bottom-content-area {
+        flex-direction: column; /* 세로로 쌓기 */
+        align-items: center;
+    }
+    .log-section, .player-management {
+        width: 100%;
+        max-width: 600px;
+    }
 }
