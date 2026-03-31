@@ -11,9 +11,3 @@ defineProps<{
     <span class="count">({{ stats.made }}/{{ stats.total }})</span>
   </div>
 </template>
-
-<style scoped>
-.stat-box { display: flex; align-items: baseline; gap: 8px; font-family: 'Inter', sans-serif; }
-.percent { font-size: 2rem; font-weight: 800; color: #111; }
-.count { font-size: 1.2rem; color: #666; font-weight: 500; }
-</style>

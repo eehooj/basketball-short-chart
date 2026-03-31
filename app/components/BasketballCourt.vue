@@ -50,15 +50,14 @@ const onCourtClick = (event: MouseEvent) => {
       </g>
 
       <g v-for="s in leftShots" :key="s.id">
-        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="6" class="marker made red" />
+        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="4.5" class="marker made red" />
         <text v-else :x="s.x" :y="s.y" dy=".35em" class="marker miss">✕</text>
       </g>
 
       <g v-for="s in rightShots" :key="s.id">
-        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="6" class="marker made blue" />
+        <circle v-if="s.type==='made'" :cx="s.x" :cy="s.y" r="4.5" class="marker made blue" />
         <text v-else :x="s.x" :y="s.y" dy=".35em" class="marker miss">✕</text>
       </g>
     </svg>
-    <p class="hint">팁: 코트 위 마커를 클릭하면 상태가 변합니다.</p>
   </div>
 </template>

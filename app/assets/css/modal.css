@@ -1,0 +1,73 @@
+/* 1. 배경 어둡게 (Overlay) */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4); /* 배경 어둡기 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* 최상단 배치 */
+}
+
+/* 2. 모달 하얀 창 (Content) */
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 850px;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. 헤더 및 닫기 버튼 */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.modal-title { font-size: 1.4rem; color: #333; margin: 0; }
+.close-x-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: #aaa; }
+
+/* 4. 기존 통계 컨테이너 좌우 배치 */
+.stats-container {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}
+.stats-box { flex: 1; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+
+/* 5. 기존 색상 로직 (파스텔톤 유지) */
+.team-label { padding: 12px; text-align: center; font-weight: bold; margin: 0; }
+
+/* HOME (왼쪽/레드) */
+.stats-box:not(.is-right) .team-label {
+    background-color: #ffadad !important;
+    color: #444;
+}
+/* AWAY (오른쪽/블루) */
+.stats-box.is-right .team-label {
+    background-color: #a0c4ff !important;
+    color: #444;
+}
+
+/* 테이블 스타일링 */
+table { width: 100%; border-collapse: collapse; }
+th { background: #fdfdfd; padding: 10px; font-size: 0.9rem; color: #666; border-bottom: 2px solid #eee; }
+td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 1.1rem; }
+.high-rate { color: #8ed081 !important; font-weight: bold; }
+.zero-rate { color: #999999 !important; }
+
+/* 하단 닫기 버튼 */
+.modal-footer { margin-top: 24px; text-align: center; }
+.close-bottom-btn {
+    padding: 10px 30px;
+    background: #eee;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}

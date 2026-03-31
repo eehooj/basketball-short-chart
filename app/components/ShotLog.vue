@@ -18,7 +18,11 @@ const emit = defineEmits(['toggle', 'remove'])
 
       <div v-for="s in logs" :key="s.id" class="log-item">
         <span :class="['status-dot', s.type === 'made' ? 'made-bg' : 'miss-bg']"></span>
-        <span class="coord">({{ Math.round(s.x) }}, {{ Math.round(s.y) }})</span>
+
+        <div class="shot-info">
+          <span class="zone-tag">{{ s.zone || '미분류' }}</span>
+        </div>
+
         <div class="btn-group">
           <button @click="emit('toggle', s)">전환</button>
           <button @click="emit('remove', s.id)" class="del-btn">삭제</button>
