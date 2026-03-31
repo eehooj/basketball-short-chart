@@ -22,8 +22,7 @@ export const useShotChart = () => {
     onMounted(() => {
         leftShots.value = JSON.parse(localStorage.getItem('leftShots') || '[]')
         rightShots.value = JSON.parse(localStorage.getItem('rightShots') || '[]')
-        const savedPlayers = localStorage.getItem('playerList')
-        players.value = savedPlayers ? JSON.parse(savedPlayers) : ['']
+        players.value = JSON.parse(localStorage.getItem('playerList') || '[]')
     })
 
     // 자동 저장
