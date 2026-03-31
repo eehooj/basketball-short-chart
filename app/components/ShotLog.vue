@@ -29,7 +29,7 @@ const emit = defineEmits<{
           @click="emit('highlight', s.id)"
           style="cursor: pointer;"
       >
-        <span :class="['status-dot', s.type === 'made' ? 'made-bg' : 'miss-bg']"></span>
+        <span :class="['status-dot', s.type === 'made' ? (s.side === 'left' ? 'made-left' : 'made-right') : 'miss-bg']"></span>
 
         <div class="shot-info">
           <span class="zone-tag">{{ s.zone || '미분류' }}</span>

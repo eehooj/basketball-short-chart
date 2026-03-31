@@ -183,6 +183,8 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 /* assets/css/main.css에 정의한 변수 사용 */
 .made-bg { background-color: var(--color-red, #e63946); }
 .miss-bg { background-color: var(--color-miss, #999); }
+.made-left { background-color: var(--color-red); }
+.made-right { background-color: var(--color-blue); }
 
 .btn-group {
     display: flex;

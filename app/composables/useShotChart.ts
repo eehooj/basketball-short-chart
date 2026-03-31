@@ -6,6 +6,7 @@ export interface Shot {
     x: number;
     y: number;
     type: 'made' | 'miss';
+    side: string;
     playerName?: string;
     newPlayers?: string;
     distance?: number;
@@ -89,8 +90,8 @@ export const useShotChart = () => {
         }
 
         // 5. 제한구역(Paint) 예외 처리 (우선순위 높음)
-        if (distance < 65) {
-            zoneName = "페인트존";
+        if (distance < 40) {
+            zoneName = "골 밑";
             is3Point = false;
         }
 
@@ -102,7 +103,8 @@ export const useShotChart = () => {
             playerName: playerName, // 🚩 추가: 현재 선택된 선수 이름 저장
             zone: zoneName,
             distance: Math.round(distance),
-            is3Point: is3Point
+            is3Point: is3Point,
+            side: isLeft ? 'left' : 'right'
         });
 
         // 디버깅용 로그
@@ -126,7 +128,7 @@ export const useShotChart = () => {
 
     // 2. 구역별로 쪼개서 리스트를 만드는 로직 (새로 추가)
     const calculateZoneStats = (shots: any[]) => {
-        const zones = ["페인트존", "미드레인지", "3점슛"]
+        const zones = ["골 밑", "미드레인지", "3점슛"]
 
         return zones.map(zoneName => {
             // 해당 구역 데이터만 필터링
