@@ -41,8 +41,8 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 
 .reset-btn, .stats-toggle-btn {
     height: 38px;
-    padding: 0 16px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
     font-weight: 600;
     cursor: pointer;
     border: 1px solid #ddd;
@@ -198,8 +198,6 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 }
 
 .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-.made-bg { background-color: var(--color-green); }
-.miss-bg { background-color: var(--color-miss); }
 
 /* Marker Style */
 .marker.made.red { stroke: var(--color-red); fill: none; stroke-width: 2px; }
@@ -329,4 +327,37 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 .delete-player-btn:hover {
     transform: scale(1.2);
     background: #cf1322;
+}
+
+/* 선수 필터 */
+.filter-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #eee;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.filter-box select {
+    border: none;
+    background: transparent;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+.reset-players-btn {
+    background-color: #f4f4f4;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.reset-players-btn:hover {
+    background-color: #e0e0e0;
 }

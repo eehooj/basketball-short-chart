@@ -4,8 +4,8 @@ import { computed, ref } from 'vue' // ref가 빠졌다면 추가
 const {
   leftShots, rightShots, addShot, removeShot,
   toggleStatus, leftStats, rightStats, resetData,
-  leftZoneStats, rightZoneStats,
-  players, addPlayer, removePlayer
+  players, addPlayer, removePlayer, calculateZoneStats,
+  resetPlayers
 } = useShotChart()
 
 const recentLogs = computed(() => {
@@ -15,10 +15,35 @@ const recentLogs = computed(() => {
 })
 
 const isStatsVisible = ref(false)
+
+const currentPlayer = ref('');      // 현재 슛을 기록할 선수
+const newPlayerName = ref('');
+const filterPlayer = ref('전체')
+
+
 const toggleStats = () => isStatsVisible.value = !isStatsVisible.value
 
-const currentPlayer = ref('선수1');      // 현재 슛을 기록할 선수
-const newPlayerName = ref('');
+const filteredLeftShots = computed(() => {
+  if (filterPlayer.value === '전체') return leftShots.value
+  return leftShots.value.filter(s => s.playerName === filterPlayer.value)
+})
+
+const filteredRightShots = computed(() => {
+  if (filterPlayer.value === '전체') return rightShots.value
+  return rightShots.value.filter(s => s.playerName === filterPlayer.value)
+})
+
+// 2. 상단 요약 통계(LEFT/RIGHT)도 필터링된 데이터 기준으로 재계산
+const getStats = (data: any[]) => {
+  const total = data.length
+  const made = data.filter(s => s.type === 'made').length
+  return { total, made, rate: total > 0 ? Math.round((made / total) * 100) : 0 }
+}
+
+
+// 3. 구역별 상세 통계(모달용) 필터링
+const displayLeftZoneStats = computed(() => calculateZoneStats(filteredLeftShots.value))
+const displayRightZoneStats = computed(() => calculateZoneStats(filteredRightShots.value))
 
 const handleAddPlayer = () => {
   if (newPlayerName.value.trim()) {
@@ -35,6 +60,20 @@ const handleRemovePlayer = (name: string) => {
     }
   }
 };
+
+const handleRecordShot = (x: number, y: number) => {
+  if (!currentPlayer.value) {
+    alert('먼저 슛을 기록할 선수를 선택해주세요!');
+    return;
+  }
+  addShot(x, y, true, currentPlayer.value);
+};
+
+const handleResetPlayers = () => {
+  resetPlayers();
+  currentPlayer.value = ''; // 🚩 선수가 다 지워졌으므로 현재 선택된 선수도 초기화
+  filterPlayer.value = '전체'; // 필터도 전체로 되돌림
+}
 </script>
 
 <template>
@@ -42,9 +81,18 @@ const handleRemovePlayer = (name: string) => {
     <div class="top-controls-row">
       <div class="action-bar">
         <button class="reset-btn" @click="resetData">슛 초기화</button>
+        <button class="reset-players-btn" @click="handleResetPlayers">선수 초기화</button>
         <button class="stats-toggle-btn" @click="toggleStats">
           {{ isStatsVisible ? '통계 숨기기' : '구역별 통계 보기' }}
         </button>
+      </div>
+
+      <div class="filter-box">
+        <label for="player-filter">차트 필터: </label>
+        <select id="player-filter" v-model="filterPlayer">
+          <option value="전체">전체 보기</option>
+          <option v-for="name in players" :key="name" :value="name">{{ name }}</option>
+        </select>
       </div>
 
       <div class="stats-flex-container court-overlay">
@@ -61,15 +109,16 @@ const handleRemovePlayer = (name: string) => {
     </div>
 
     <BasketballCourt
-        :leftShots="leftShots"
-        :rightShots="rightShots"
-        @record="(x, y) => addShot(x, y, true, currentPlayer)"
+        :leftShots="filteredLeftShots"
+        :rightShots="filteredRightShots"
+        @record="handleRecordShot"
     />
 
     <ShotStatsModal
         :isVisible="isStatsVisible"
-        :leftZoneStats="leftZoneStats"
-        :rightZoneStats="rightZoneStats"
+        :leftZoneStats="displayLeftZoneStats"
+        :rightZoneStats="displayRightZoneStats"
+        :filterPlayer="filterPlayer"
         @close="toggleStats"
     />
 
@@ -107,13 +156,6 @@ const handleRemovePlayer = (name: string) => {
                 @click="currentPlayer = name"
             >
               {{ name }}
-            </button>
-
-            <button
-                class="delete-player-btn"
-                @click.stop="handleRemovePlayer(name)"
-            >
-              ×
             </button>
           </div>
         </div>

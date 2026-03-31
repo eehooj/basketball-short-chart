@@ -4,6 +4,7 @@ interface Props {
   isVisible: boolean;
   leftZoneStats: any[];
   rightZoneStats: any[];
+  filterPlayer: string;
 }
 
 const props = defineProps<Props>();
@@ -21,7 +22,7 @@ const close = () => {
   <div v-if="props.isVisible" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">구역별 상세 통계</h2>
+        <h2 class="modal-title"> {{ props.filterPlayer }} 구역별 상세 통계</h2>
         <button class="close-x-btn" @click="close">×</button>
       </div>
 

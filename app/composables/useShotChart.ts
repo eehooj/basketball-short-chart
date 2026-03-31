@@ -1,4 +1,5 @@
 import { COURT_CONFIG } from '~/utils/constants'
+import { computed, ref } from "vue";
 
 export interface Shot {
     id: number;
@@ -42,6 +43,13 @@ export const useShotChart = () => {
 
     const removePlayer = (name: string) => {
         players.value = players.value.filter(p => p !== name)
+    }
+
+    const resetPlayers = () => {
+        if (confirm('등록된 모든 선수 목록을 삭제하시겠습니까?')) {
+            players.value = [] // 빈 배열로 초기화
+            localStorage.removeItem('playerList')
+        }
     }
 
     const addShot = (x: number, y: number, isMade: boolean = true, playerName: string = '익명') => {
@@ -157,6 +165,6 @@ export const useShotChart = () => {
         rightStats: computed(() => getStats(rightShots.value)),
         players,
         addPlayer,
-        removePlayer,
+        removePlayer, resetPlayers
     }
 }
