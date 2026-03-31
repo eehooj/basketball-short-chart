@@ -300,18 +300,18 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 /* 선수 리스트 버튼 (기존 스타일 유지) */
 .player-list {
     display: flex;
-    gap: 8px;
+    gap: 3px;
     flex-wrap: wrap;
 }
 
 .player-list button {
-    padding: 8px 16px;
+    padding: 8px 9px;
     border-radius: 20px;
     border: 1px solid #ddd;
     background: #fff;
     cursor: pointer;
     transition: 0.2s;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .player-list button.active {
