@@ -1,5 +1,6 @@
 import { COURT_CONFIG } from '~/utils/constants'
 import { computed, ref } from "vue";
+import { saveBasketballExcel } from '~/utils/excel-utils';
 
 export interface Shot {
     id: number;
@@ -156,16 +157,21 @@ export const useShotChart = () => {
         }
     }
 
+    // 엑셀
+    const downloadExcel = () => {
+        // 분리한 파일을 호출하면서 현재 데이터들을 인자로 넘깁니다.
+        saveBasketballExcel(players.value, leftShots.value, rightShots.value);
+    };
+
     return {
-        leftShots, rightShots,
+        leftShots, rightShots, players,
         addShot, removeShot, toggleStatus,
         resetData, calculateZoneStats,
         leftZoneStats: computed(() => calculateZoneStats(leftShots.value)),
         rightZoneStats: computed(() => calculateZoneStats(rightShots.value)),
         leftStats: computed(() => getStats(leftShots.value)),
         rightStats: computed(() => getStats(rightShots.value)),
-        players,
-        addPlayer,
-        removePlayer, resetPlayers
+        addPlayer, removePlayer, resetPlayers,
+        downloadExcel
     }
 }

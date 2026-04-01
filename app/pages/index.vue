@@ -9,7 +9,7 @@ const {
   leftShots, rightShots, addShot, removeShot,
   toggleStatus, leftStats, rightStats, resetData,
   players, addPlayer, removePlayer, calculateZoneStats,
-  resetPlayers
+  resetPlayers, downloadExcel
 } = useShotChart()
 
 const recentLogs = computed(() => {
@@ -176,6 +176,9 @@ const handleResetPlayers = () => {
         </div>
       </div>
     </div>
+    <button @click="downloadExcel" class="btn-excel">
+      엑셀 다운로드
+    </button>
   </div>
 
 </template>
