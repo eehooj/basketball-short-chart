@@ -463,7 +463,7 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 }
 
 
-@media (max-width: 850px) {
+@media (max-width: 850px) and (orientation: portrait) {
     .bottom-content-area {
         flex-direction: column; /* 세로로 쌓기 */
         align-items: center;
