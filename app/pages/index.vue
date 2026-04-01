@@ -97,7 +97,7 @@ const handleResetPlayers = () => {
       </div>
 
       <div class="filter-box">
-        <label for="player-filter">차트 필터: </label>
+        <label for="player-filter">필터: </label>
         <select id="player-filter" v-model="filterPlayer">
           <option value="전체">전체 보기</option>
           <option v-for="name in players" :key="name" :value="name">{{ name }}</option>

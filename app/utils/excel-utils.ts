@@ -81,8 +81,13 @@ export const saveBasketballExcel = async (players: string[], leftShots: Shot[], 
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement('a');
 
+    const now = new Date();
+    const kstDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+        .toISOString()
+        .split('T')[0];
+
     anchor.href = url;
-    anchor.download = `농구_기록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    anchor.download = `농구_기록_${kstDate}.xlsx`;
     anchor.click();
     window.URL.revokeObjectURL(url);
 };
