@@ -117,61 +117,63 @@ const handleResetPlayers = () => {
       </div>
     </div>
 
-    <BasketballCourt
-        :leftShots="filteredLeftShots"
-        :rightShots="filteredRightShots"
-        :activeId="activeLogId"
-        @record="handleRecordShot"
-    />
-
-    <ShotStatsModal
-        :isVisible="isStatsVisible"
-        :leftZoneStats="displayLeftZoneStats"
-        :rightZoneStats="displayRightZoneStats"
-        :filterPlayer="filterPlayer"
-        @close="toggleStats"
-    />
-
-    <div class="bottom-content-area">
-      <ShotLog
-          :logs="recentLogs"
+    <div class="main-content-block">
+      <BasketballCourt
+          :leftShots="filteredLeftShots"
+          :rightShots="filteredRightShots"
           :activeId="activeLogId"
-          @toggle="toggleStatus"
-          @remove="removeShot"
-          @highlight="handleHighlightShot"
+          @record="handleRecordShot"
       />
 
-      <div class="player-management">
-        <div class="management-header">
-          <div class="left-group">
-            <h3>선수</h3>
-            <div class="current-shooter-info">
-              현재 선택: <strong>{{ currentPlayer || '-' }}</strong>
+      <ShotStatsModal
+          :isVisible="isStatsVisible"
+          :leftZoneStats="displayLeftZoneStats"
+          :rightZoneStats="displayRightZoneStats"
+          :filterPlayer="filterPlayer"
+          @close="toggleStats"
+      />
+
+      <div class="bottom-content-area">
+        <ShotLog
+            :logs="recentLogs"
+            :activeId="activeLogId"
+            @toggle="toggleStatus"
+            @remove="removeShot"
+            @highlight="handleHighlightShot"
+        />
+
+        <div class="player-management flex-item">
+          <div class="management-header">
+            <div class="left-group">
+              <h3>선수</h3>
+              <div class="current-shooter-info">
+                현재 선택: <strong>{{ currentPlayer || '-' }}</strong>
+              </div>
+            </div>
+
+            <div class="add-player">
+              <input
+                  v-model="newPlayerName"
+                  placeholder="이름 입력"
+                  @keyup.enter="handleAddPlayer"
+              />
+              <button @click="handleAddPlayer">추가</button>
             </div>
           </div>
 
-          <div class="add-player">
-            <input
-                v-model="newPlayerName"
-                placeholder="이름 입력"
-                @keyup.enter="handleAddPlayer"
-            />
-            <button @click="handleAddPlayer">추가</button>
-          </div>
-        </div>
-
-        <div class="player-list">
-          <div
-              v-for="name in players"
-              :key="name"
-              class="player-item"
-          >
-            <button
-                :class="{ active: currentPlayer === name }"
-                @click="currentPlayer = name"
+          <div class="player-list">
+            <div
+                v-for="name in players"
+                :key="name"
+                class="player-item"
             >
-              {{ name }}
-            </button>
+              <button
+                  :class="{ active: currentPlayer === name }"
+                  @click="currentPlayer = name"
+              >
+                {{ name }}
+              </button>
+            </div>
           </div>
         </div>
       </div>

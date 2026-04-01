@@ -96,24 +96,26 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 
 /* 🚩 코트 스타일 */
 .court-wrapper {
-    width: 100%;
-    max-width: 900px;
+    width: 100%;             /* 🚩 고정 너비 삭제 -> 부모 너비 맞춤 */
+    max-width: none;         /* 부모의 max-width를 따름 */
     border: 1px solid #eee;
     position: relative;
     background: #fff;
+    margin: 0;               /* 부모의 중앙 정렬을 따름 */
 }
 .main-court { width: 100%; height: auto; display: block; cursor: crosshair; }
 
 /* 1. 최근 기록 */
 .shot-tracker-page .log-section {
-    flex: 0 0 350px;                 /* 가로 공간 분할 */
+    flex: 1;                 /* 고정 350px 삭제 -> 비율로 변경 */
+    min-width: 0;            /* flex 자식이 넘치는 것 방지 */
     background: #fdfdfd;
     padding: 15px;
     border-radius: 16px;
     border: 1px solid #eee;
     display: flex;
     flex-direction: column;
-    max-height: 250px;       /* 스크롤 높이 살짝 조정 */
+    min-height: 250px;       /* max-height 대신 min-height 권장 */
 }
 
 /* 실제 아이템들이 담기는 내부 스크롤 영역 */
@@ -223,24 +225,24 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 
 /* 선수 */
 .bottom-content-area {
-    display: flex !important;
-    flex-direction: row !important; /* 강제로 가로 방향 설정 */
+    width: 100%;             /* 고정 너비 삭제 -> 부모 너비 맞춤 */
+    max-width: none;         /* 부모의 max-width를 따름 */
+    display: flex;
+    flex-direction: row;
     justify-content: center;
-    align-items: stretch;
-    gap: 15px;               /* 두 박스 사이의 간격 */
-    width: 100%;
-    max-width: 900px;        /* 코트 너비와 일치 */
-    margin: 20px auto;
+    align-items: flex-start;
+    gap: 15px;               /* 두 박스 사이 간격 */
+    margin: 0;               /* 부모의 중앙 정렬을 따름 */
 }
 
 .player-management {
-    flex: 0 0 350px;
-    background: #fdfdfd;     /* 로그 섹션과 동일한 배경 */
-    border-radius: 16px;     /* 동일한 라운딩 */
-    border: 1px solid #eee;  /* 동일한 테두리 */
-    padding: 0 20px 10px 20px;
-    gap: 10px;
-    margin-bottom: 15px;
+    flex: 1;                 /* 고정 350px 삭제 -> 비율로 변경 */
+    min-width: 0;            /* flex 자식이 넘치는 것 방지 */
+    background: #fdfdfd;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    padding: 20px;
+    margin-bottom: 0;        /* 하단 마진 제거 */
 }
 
 .management-header {
@@ -382,17 +384,6 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     outline: none;
 }
 
-@media (max-width: 850px) {
-    .bottom-content-area {
-        flex-direction: column; /* 세로로 쌓기 */
-        align-items: center;
-    }
-    .log-section, .player-management {
-        width: 100%;
-        max-width: 600px;
-    }
-}
-
 .marker.highlighted {
     stroke: var(--color-green) !important; /* 검정색 테두리 */
     stroke-width: 3px !important;
@@ -414,6 +405,7 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 }
 
 .btn-excel {
+    margin: 10px auto 20px auto;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -446,4 +438,67 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     gap: 10px;
     margin-bottom: 15px;
     flex-wrap: wrap;
+}
+
+.main-content-block {
+    width: 100%;
+    max-width: 900px;        /* 코트 이미지의 너비와 일치 */
+    margin: 0 auto;          /* 가로 중앙 정렬의 핵심 */
+    display: flex;
+    flex-direction: column;  /* 코트 밑에 하단을 쌓음 */
+    gap: 15px;               /* 코트와 하단 사이 간격 */
+    box-sizing: border-box;  /* 패딩을 너비에 포함 */
+}
+
+.shot-tracker-page .log-section,
+.player-management {
+    flex: 1;                 /* 반반씩 나눠 갖기 */
+    min-width: 0;            /* flex 자식이 넘치는 것 방지 */
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    box-sizing: border-box;
+    height: 250px;           /* 스크롤 높이 통일 권장 */
+}
+
+
+@media (max-width: 850px) {
+    .bottom-content-area {
+        flex-direction: column; /* 세로로 쌓기 */
+        align-items: center;
+    }
+
+    .log-section, .player-management {
+        width: 100%;
+        max-width: 600px;
+        padding: 15px;      /* 🚩 내부 패딩을 줄여 높이 압축 */
+    }
+
+    /* 1. 상단 전체를 세로 정렬 및 중앙 정렬로 변경 */
+    .top-controls-row {
+        flex-direction: column;
+        gap: 10px; /* 요소들 사이의 간격 */
+        align-items: center; /* 가로 중앙 정렬 */
+    }
+
+    /* 2. 필터 셀렉트 박스 스타일 */
+    .filter-box {
+        width: fit-content; /* 텍스트 길이에 맞게 너비 조정 */
+        justify-content: center;
+        display: flex;
+    }
+
+    /* 3. 버튼들(action-bar)도 중앙 정렬 */
+    .action-bar {
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* 4. LEFT/RIGHT 요약 통계도 중앙 정렬 */
+    .stats-flex-container.court-overlay {
+        justify-content: center;
+        width: 100%;
+        margin-top: 2px;    /* 필터 박스와의 간격 축소 */
+    }
 }
