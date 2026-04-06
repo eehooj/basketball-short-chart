@@ -67,28 +67,23 @@ export const useShotChart = () => {
         const distance = Math.sqrt(dx * dx + dy * dy); // 직선 거리
 
         // 3. 판정 임계값 (Thresholds) - 이 수치들을 조정해서 감도를 맞춥니다.
-        const ARC_THREE_DISTANCE = 180;  // 정면/윙 3점 거리
-        const CORNER_THREE_DX = 145;     // 코너 직선의 가로 시작점
+        const ARC_THREE_DISTANCE = 185;  // 정면/윙 3점 거리
+        const CORNER_THREE_DX = 148;     // 코너 직선의 가로 시작점
         const CORNER_ZONE_DY = 135;      // 코너 직선이 시작되는 세로 높이
-        const BASELINE_THREE_DY = 175;   // 베이스라인 부근 세로 높이
 
-        // 4. 3점슛 판정 로직 (Priority: Corner/Baseline -> Arc)
-        let is3Point;
-        let zoneName;
+        let is3Point = false;
 
-        if (dy > BASELINE_THREE_DY) {
-            // A. 베이스라인 깊숙한 곳 (dx가 작아도 무조건 3점)
-            is3Point = dx > (CORNER_THREE_DX - 5);
-            zoneName = "3점슛";
-        } else if (dy > CORNER_ZONE_DY) {
-            // B. 일반 코너 직선 구간
-            is3Point = dx > CORNER_THREE_DX;
-            zoneName = is3Point ? "3점슛" : "미드레인지";
-        } else {
-            // C. 정면 및 윙 부채꼴 구간
-            is3Point = distance >= ARC_THREE_DISTANCE;
-            zoneName = is3Point ? "3점슛" : "미드레인지";
+        // 우선 전체 거리(반지름)가 180 이상이면 3점으로 간주
+        if (distance >= ARC_THREE_DISTANCE) {
+            is3Point = true;
         }
+        // 혹은, 코너 직선 구간(dy가 높을 때)에서 가로 거리가 140 이상이면 3점
+        else if (dy > CORNER_ZONE_DY && dx >= CORNER_THREE_DX) {
+            is3Point = true;
+        }
+
+        // 5. 구역 이름 및 예외 처리
+        let zoneName = is3Point ? "3점슛" : "미드레인지";
 
         // 5. 제한구역(Paint) 예외 처리 (우선순위 높음)
         if (distance < 40) {

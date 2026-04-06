@@ -115,7 +115,7 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
     border: 1px solid #eee;
     display: flex;
     flex-direction: column;
-    min-height: 250px;       /* max-height 대신 min-height 권장 */
+    min-height: 200px;       /* max-height 대신 min-height 권장 */
 }
 
 /* 실제 아이템들이 담기는 내부 스크롤 영역 */
@@ -387,7 +387,9 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 .marker.highlighted {
     stroke: var(--color-green) !important; /* 검정색 테두리 */
     stroke-width: 3px !important;
-    r: 7px; /* 크기도 살짝 키움 */
+    transform: scale(1.2);      /* 원 크기 */
+    transform-origin: center;   /* 중요: 중심을 기준으로 커지도록 설정 */
+    transform-box: fill-box;    /* SVG 요소 내에서 자신의 박스 기준으로 scale 적용 */
     transition: all 0.2s;
 }
 
@@ -463,16 +465,26 @@ body { margin: 0; font-family: var(--font-main), sans-serif; background: #fff; }
 }
 
 
-@media (max-width: 850px) and (orientation: portrait) {
+@media (max-width: 650px) and (orientation: portrait) {
     .bottom-content-area {
         flex-direction: column; /* 세로로 쌓기 */
         align-items: center;
     }
 
+    .log-section {
+        max-height: 150px;    /* 약 2~3개가 보일 정도의 높이 (조정 가능) */
+        overflow-y: auto;     /* 내용이 넘치면 내부 스크롤 생성 */
+        padding-right: 5px;   /* 스크롤바와 내용 사이 간격 */
+
+        /* 스크롤바 디자인 (선택 사항) */
+        scrollbar-width: thin;
+        scrollbar-color: #ccc transparent;
+    }
+
     .log-section, .player-management {
         width: 100%;
         max-width: 600px;
-        padding: 15px;      /* 🚩 내부 패딩을 줄여 높이 압축 */
+        padding: 15px;      /* 내부 패딩을 줄여 높이 압축 */
     }
 
     /* 1. 상단 전체를 세로 정렬 및 중앙 정렬로 변경 */
