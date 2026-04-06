@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    css: ['~/assets/css/main.css', '~/assets/css/modal.css'],
+    css: ['~/assets/css/main.css', '~/assets/css/modal.css', '~/assets/css/list.css'],
     runtimeConfig: {
         // 서버 전용 (Server-side only)
         kvRestApiUrl: process.env.KV_REST_API_URL,

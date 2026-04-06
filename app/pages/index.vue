@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import ShotStats from "../components/ShotStats.vue";
 import BasketballCourt from "../components/BasketballCourt.vue";
 import ShotStatsModal from "../components/ShotStatsModal.vue";
 import ShotLog from "../components/ShotLog.vue"; // ref가 빠졌다면 추가
+import SavedMatchList from '../components/SavedMatchList.vue'
 
 // 1. 서버에서 받아올 데이터의 타입을 정의
 interface ShotData {
@@ -198,6 +199,37 @@ const loadFromCloud = async () => {
     alert('데이터를 불러오는 중 오류가 발생했습니다.');
   }
 };
+
+const onMatchSelected = async (fullKey: string) => {
+  console.log("목록에서 선택됨:", fullKey);
+
+  try {
+    // 1. 키 분리 로직 수정
+    // 날짜는 항상 10자(YYYY-MM-DD)이므로 고정 길이를 사용하는 것이 가장 안전합니다.
+    const datePart = fullKey.substring(0, 10); // "2026-04-06"
+    const remaining = fullKey.substring(11);    // "상대편_1쿼터" (날짜 뒤의 하이픈 제외)
+
+    // 나머지에서 경기명과 태그 분리
+    const [namePart = '', tagPart = '최종'] = remaining.split('_');
+
+    // 2. 반응형 변수에 값 할당
+    selectedDate.value = datePart;
+    matchName.value = namePart;
+    saveTag.value = tagPart;
+
+    console.log(`매칭 완료: 날짜(${selectedDate.value}), 경기(${matchName.value}), 태그(${saveTag.value})`);
+
+    // 3. Vue가 상태를 반영할 때까지 대기
+    await nextTick();
+
+    // 4. 데이터 불러오기 실행
+    await loadFromCloud();
+
+  } catch (error) {
+    console.error("데이터 매칭 중 오류 발생:", error);
+    alert("데이터 형식이 올바르지 않습니다.");
+  }
+};
 </script>
 
 <template>
@@ -325,6 +357,5 @@ const loadFromCloud = async () => {
       </div>
     </div>
   </div>
-
-
+  <SavedMatchList @select="onMatchSelected" />
 </template>
