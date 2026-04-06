@@ -83,6 +83,29 @@ const handleResetPlayers = () => {
   currentPlayer.value = ''; // 🚩 선수가 다 지워졌으므로 현재 선택된 선수도 초기화
   filterPlayer.value = '전체'; // 필터도 전체로 되돌림
 }
+
+const selectedDate = ref(new Date().toISOString().split('T')[0]); // 오늘 날짜 기본값
+
+const saveToCloud = async () => {
+  try {
+    // 우리가 만든 /api/save-shots로 데이터를 쏩니다.
+    const res = await $fetch('/api/save-shots', {
+      method: 'POST',
+      body: {
+        date: selectedDate.value,
+        leftShots: leftShots.value,   // 기존 reactive 변수명에 맞게 수정
+        rightShots: rightShots.value,
+        players: players.value
+      }
+    });
+
+    if (res.success) {
+      alert(`${selectedDate.value} 기록이 서버에 저장되었습니다!`);
+    }
+  } catch (error) {
+    alert('저장 실패! 터미널의 에러 로그를 확인해주세요.');
+  }
+};
 </script>
 
 <template>
@@ -181,6 +204,10 @@ const handleResetPlayers = () => {
     <button @click="downloadExcel" class="btn-excel">
       엑셀 다운로드
     </button>
+    <div class="save-container">
+      <input type="date" v-model="selectedDate" class="date-input" />
+      <button @click="saveToCloud" class="save-btn">클라우드에 저장</button>
+    </div>
   </div>
 
 </template>
