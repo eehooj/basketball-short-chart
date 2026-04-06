@@ -5,6 +5,14 @@ import BasketballCourt from "../components/BasketballCourt.vue";
 import ShotStatsModal from "../components/ShotStatsModal.vue";
 import ShotLog from "../components/ShotLog.vue"; // ref가 빠졌다면 추가
 
+// 1. 서버에서 받아올 데이터의 타입을 정의
+interface ShotData {
+  leftShots: any[];  // 상세한 타입이 있다면 any 대신 해당 타입을 적어주세요 (예: Shot[])
+  rightShots: any[];
+  players: string[];
+  updatedAt?: string;
+}
+
 const {
   leftShots, rightShots, addShot, removeShot,
   toggleStatus, leftStats, rightStats, resetData,
@@ -87,6 +95,13 @@ const handleResetPlayers = () => {
 const selectedDate = ref(new Date().toISOString().split('T')[0]); // 오늘 날짜 기본값
 
 const saveToCloud = async () => {
+  // 데이터가 아예 없는데 저장하려고 하면 경고창 띄우기
+  if (leftShots.value.length === 0 && rightShots.value.length === 0) {
+    if (!confirm("빈 데이터를 저장하시겠습니까?")) {
+      return;
+    }
+  }
+
   try {
     // 우리가 만든 /api/save-shots로 데이터를 쏩니다.
     const res = await $fetch('/api/save-shots', {
@@ -104,6 +119,27 @@ const saveToCloud = async () => {
     }
   } catch (error) {
     alert('저장 실패! 터미널의 에러 로그를 확인해주세요.');
+  }
+};
+
+const loadFromCloud = async () => {
+  try {
+    // 🚩 <ShotData>를 추가하여 타입을 명시합니다.
+    const data = await $fetch<ShotData>(`/api/get-shots`, {
+      query: { date: selectedDate.value }
+    });
+
+    if (data) {
+      // 이제 data.leftShots 등에 빨간 줄이 생기지 않습니다.
+      leftShots.value = data.leftShots || [];
+      rightShots.value = data.rightShots || [];
+      players.value = data.players || [];
+
+      alert(`${selectedDate.value} 기록을 성공적으로 불러왔습니다!`);
+    }
+  } catch (e) {
+    console.error(e);
+    alert('데이터를 가져오는데 실패했습니다.');
   }
 };
 </script>
@@ -207,7 +243,9 @@ const saveToCloud = async () => {
     <div class="save-container">
       <input type="date" v-model="selectedDate" class="date-input" />
       <button @click="saveToCloud" class="save-btn">클라우드에 저장</button>
+      <button @click="loadFromCloud" class="load-btn" style="background-color: #2196F3; color: white; margin-left: 10px;">불러오기</button>
     </div>
   </div>
+
 
 </template>
