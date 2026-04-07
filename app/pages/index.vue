@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from 'vue'
-import { useShotChart, type BasketballShot } from '../composables/useShotChart' // BasketballShot으로 변경
-import ShotStats from "../components/ShotStats.vue";
-import BasketballCourt from "../components/BasketballCourt.vue";
-import ShotStatsModal from "../components/ShotStatsModal.vue";
-import ShotLog from "../components/ShotLog.vue";
+import { useShotChart, type BasketballShot } from '../composables/useShotChart'
+import ShotStats from '../components/ShotStats.vue'
+import BasketballCourt from '../components/BasketballCourt.vue'
+import ShotStatsModal from '../components/ShotStatsModal.vue'
+import ShotLog from '../components/ShotLog.vue'
 import SavedMatchList from '../components/SavedMatchList.vue'
 
 /**
