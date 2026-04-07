@@ -129,48 +129,82 @@ const handleHighlightShot = (id: number) => {
 const toggleStats = () => isStatsVisible.value = !isStatsVisible.value
 
 /**
- * [클라우드 데이터 처리]
+ * [헬퍼 함수 - 비밀번호 세션 관리]
+ */
+const getSessionPassword = () => {
+  const auth = JSON.parse(localStorage.getItem('app_auth') || '{}');
+  if (auth.password && auth.expiresAt > Date.now()) {
+    return auth.password;
+  }
+  return null;
+};
+
+const setSessionPassword = (pw: string) => {
+  const expiresAt = Date.now() + 30 * 60 * 1000; // 30분 후 만료
+  localStorage.setItem('app_auth', JSON.stringify({ password: pw, expiresAt }));
+};
+
+/**
+ * [클라우드 데이터 처리 - 서브 로직]
+ */
+// 1. 기존 데이터 존재 확인 및 덮어쓰기 승인
+const checkOverwritePermission = async (key: string) => {
+  try {
+    const data = await fetchShotData(key);
+    if (data && (data.leftShots?.length > 0 || data.rightShots?.length > 0)) {
+      return confirm(`[${key}] 이미 저장된 기록이 있습니다. 덮어씌우시겠습니까?`);
+    }
+  } catch (e) {}
+  return true;
+};
+
+// 2. 유효한 비밀번호 확보 (세션 또는 입력)
+const getValidPassword = () => {
+  const sessionPw = getSessionPassword();
+  if (sessionPw) return sessionPw;
+  
+  const inputPw = prompt('비밀번호를 입력해주세요:');
+  if (inputPw) setSessionPassword(inputPw);
+  return inputPw;
+};
+
+// 3. 서버에 데이터 전송 실행
+const executeSaveRequest = async (key: string, pw: string) => {
+  return await $fetch<{ success: boolean }>('/api/save-shots', {
+    method: 'POST',
+    body: {
+      date: key,
+      leftShots: leftShots.value,
+      rightShots: rightShots.value,
+      players: players.value,
+      password: pw
+    }
+  });
+};
+
+/**
+ * [메인 함수 - 클라우드 저장]
  */
 const saveToCloud = async () => {
   if (!matchName.value.trim()) return alert('경기 이름을 입력해주세요!');
 
   const versionKey = getVersionKey(selectedDate.value || '', matchName.value, saveTag.value);
 
-  // 1. 기존 데이터 존재 여부 확인
-  try {
-    const existingData = await $fetch<ShotData | null>(`/api/get-shots`, { query: { date: versionKey } });
-    
-    // 데이터가 있고, 슛 기록이 하나라도 있다면 덮어쓰기 확인
-    if (existingData && (existingData.leftShots?.length > 0 || existingData.rightShots?.length > 0)) {
-      if (!confirm(`[${versionKey}] 이미 저장된 기록이 있습니다. 덮어씌우시겠습니까?`)) {
-        return; // 사용자가 취소를 누르면 중단
-      }
-    }
-  } catch (e) {
-    // 에러 발생 시(데이터가 없는 경우 등) 무시하고 진행
-    console.log(`기존 데이터 존재 확인 중 문제 발생: ${e}`);
-  }
+  // 1. 기존 데이터 확인
+  if (!(await checkOverwritePermission(versionKey))) return;
 
-  // 2. 비밀번호 입력 및 저장 진행
-  const password = prompt('비밀번호를 입력해주세요:');
+  // 2. 비밀번호 확인
+  const password = getValidPassword();
   if (!password) return;
 
+  // 3. 빈 데이터 확인
   if (leftShots.value.length === 0 && rightShots.value.length === 0) {
     if (!confirm(`[${versionKey}] 현재 기록된 슛이 없습니다. 빈 데이터를 저장하시겠습니까?`)) return;
   }
 
+  // 4. 전송 및 결과 처리
   try {
-    const res = await $fetch<{ success: boolean }>('/api/save-shots', {
-      method: 'POST',
-      body: {
-        date: versionKey,
-        leftShots: leftShots.value,
-        rightShots: rightShots.value,
-        players: players.value,
-        password: password
-      }
-    });
-
+    const res = await executeSaveRequest(versionKey, password);
     if (res.success) {
       alert(`[${versionKey}] 기록이 저장되었습니다!`);
       if (confirm(`${saveTag.value} 저장 완료. 다음 기록을 위해 화면을 비울까요?`)) {
@@ -179,8 +213,12 @@ const saveToCloud = async () => {
       }
     }
   } catch (error: any) {
-    const msg = error.statusText || '저장 실패: 비밀번호를 확인해주세요.';
-    alert(msg);
+    if (error.status === 401) {
+      localStorage.removeItem('app_auth');
+      alert('비밀번호가 틀렸습니다. 다시 시도해주세요.');
+    } else {
+      alert('저장 실패: ' + (error.statusText || '알 수 없는 오류'));
+    }
   }
 };
 
@@ -219,6 +257,46 @@ const onMatchSelected = async (fullKey: string) => {
   } catch (error: any) {
     console.error('[Match Selection Error]', error);
     alert("데이터 형식이 올바르지 않습니다.");
+  }
+};
+
+/**
+ * [함수 - 그룹 전체(모든 쿼터) 선택 핸들러]
+ */
+const onGroupSelected = async (baseKey: string, keys: string[]) => {
+  try {
+    // 1. 경기 정보 설정 (날짜와 경기명 추출)
+    const datePart = baseKey.substring(0, 10);
+    const namePart = baseKey.substring(11);
+    
+    selectedDate.value = datePart;
+    matchName.value = namePart;
+    saveTag.value = '전체합산';
+
+    // 2. 모든 키의 데이터를 병합하여 가져오기
+    const results = await Promise.all(keys.map(key => fetchShotData(key)));
+
+    const combinedLeft: BasketballShot[] = [];
+    const combinedRight: BasketballShot[] = [];
+    const combinedPlayers = new Set<string>();
+
+    results.forEach(data => {
+      if (data) {
+        combinedLeft.push(...(data.leftShots || []));
+        combinedRight.push(...(data.rightShots || []));
+        (data.players || []).forEach(p => combinedPlayers.add(p));
+      }
+    });
+
+    // 3. 화면 데이터 갱신
+    leftShots.value = combinedLeft;
+    rightShots.value = combinedRight;
+    players.value = Array.from(combinedPlayers);
+
+    alert(`[${namePart}] 저장된 모든 기록(${keys.length}개)을 합산하여 불러왔습니다.`);
+  } catch (error) {
+    console.error('[Group Selection Error]', error);
+    alert("데이터를 불러오는 중 오류가 발생했습니다.");
   }
 };
 </script>
@@ -354,7 +432,7 @@ const onMatchSelected = async (fullKey: string) => {
 
       <div class="button-group main-actions">
         <button @click="saveToCloud" class="save-btn">서버 저장</button>
-        <SavedMatchList @select="onMatchSelected" />
+        <SavedMatchList @select="onMatchSelected" @selectGroup="onGroupSelected" />
       </div>
     </div>
   </div>

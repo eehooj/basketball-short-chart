@@ -8,26 +8,50 @@ const isVisible = ref(false);           // 목록 모달 표시 여부
 const rawMatches = ref<string[]>([]);   // 서버에서 받아온 전체 키 목록
 const expandedGroups = ref<string[]>([]); // 현재 펼쳐진 그룹들의 baseKey 목록
 
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'selectGroup']);
+
+/**
+ * [헬퍼 함수 - 비밀번호 세션 관리]
+ */
+const getSessionPassword = () => {
+  const auth = JSON.parse(localStorage.getItem('app_auth') || '{}');
+  if (auth.password && auth.expiresAt > Date.now()) {
+    return auth.password;
+  }
+  return null;
+};
+
+const setSessionPassword = (pw: string) => {
+  const expiresAt = Date.now() + 30 * 60 * 1000;
+  localStorage.setItem('app_auth', JSON.stringify({ password: pw, expiresAt }));
+};
 
 /**
  * [목록 불러오기]
  * 햄버거 메뉴 클릭 시 서버에서 저장된 경기 목록을 가져옵니다.
  */
 const openList = async () => {
-  const password = prompt('비밀번호를 입력해주세요:');
-  if (!password) return;
+  let password = getSessionPassword();
+  if (!password) {
+    password = prompt('비밀번호를 입력해주세요:');
+    if (!password) return;
+  }
 
   try {
     // API 호출 시 비밀번호 쿼리 파라미터 추가
     rawMatches.value = await $fetch<string[]>('/api/get-list', {
       query: { password: password }
     });
+    setSessionPassword(password); // 성공 시 세션 저장/갱신
     isVisible.value = true;
   } catch (error: any) {
-    console.error('[Match List Fetch Error]', error);
-    const msg = error.statusText || '비밀번호가 틀렸거나 목록을 불러오는 데 실패했습니다.';
-    alert(msg);
+    if (error.status === 401) {
+      localStorage.removeItem('app_auth');
+      alert('비밀번호가 틀렸습니다. 다시 시도해주세요.');
+    } else {
+      console.error('[Match List Fetch Error]', error);
+      alert('목록을 불러오는 데 실패했습니다.');
+    }
   }
 };
 
@@ -71,10 +95,17 @@ const toggleGroup = (baseKey: string) => {
   }
 };
 
-// 경기 선택 시 부모 컴포넌트로 전달
+// 경기 선택 시 부모 컴포넌트로 전달 (단일 쿼터)
 const handleSelect = (key: string) => {
   if (!key) return;
   emit('select', key);
+  isVisible.value = false; // 모달 닫기
+};
+
+// 그룹 전체 선택 (모든 쿼터 합산 로드)
+const handleSelectGroup = (baseKey: string, children: string[]) => {
+  if (children.length === 0) return;
+  emit('selectGroup', baseKey, children);
   isVisible.value = false; // 모달 닫기
 };
 </script>
@@ -102,27 +133,28 @@ const handleSelect = (key: string) => {
 
             <!-- 그룹별 목록 렌더링 -->
             <div v-for="group in groupedMatches" :key="group.baseKey" class="match-group">
-              <div class="group-header" @click="toggleGroup(group.baseKey)">
-                <!-- 그룹 메인 정보 -->
-                <div class="main-info">
-                  <span class="name">{{ group.baseKey }}</span>
-                  <span class="count">({{ group.children.length }}개 기록)</span>
+              <div class="group-header">
+                <!-- 경기명 클릭 시 해당 경기의 모든 쿼터 데이터 합산 로드 -->
+                <div class="main-info" @click="handleSelectGroup(group.baseKey, group.children)" style="cursor: pointer;" title="전체 쿼터 합산해서 보기">
+                  <span class="name" style="font-weight: bold; color: #2196F3;">{{ group.baseKey }}</span>
+                  <span class="count" style="font-size: 12px; color: #666; margin-left: 8px;">전체보기 ({{ group.children.length }}개)</span>
                 </div>
                 
                 <!-- 하위 쿼터 토글 버튼 -->
-                <button class="toggle-btn">
+                <button class="toggle-btn" @click.stop="toggleGroup(group.baseKey)" style="background: none; border: none; cursor: pointer; padding: 10px;">
                   {{ expandedGroups.includes(group.baseKey) ? '▲' : '▼' }}
                 </button>
               </div>
 
               <!-- 하위 쿼터 목록 -->
               <Transition name="slide-fade">
-                <div v-if="expandedGroups.includes(group.baseKey)" class="group-children">
+                <div v-if="expandedGroups.includes(group.baseKey)" class="group-children" style="background: #f9f9f9; padding-left: 20px;">
                   <div v-for="child in group.children"
                        :key="child"
                        class="child-item"
-                       @click.stop="handleSelect(child)">
-                    <span class="bullet">ㄴ</span> 
+                       @click="handleSelect(child)"
+                       style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;">
+                    <span class="bullet" style="color: #999; margin-right: 5px;">ㄴ</span> 
                     {{ child.split('_')[1] || '기타' }}
                   </div>
                 </div>
@@ -171,5 +203,22 @@ const handleSelect = (key: string) => {
 .modal-body {
   overflow-y: auto;
   padding: 15px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+}
+
+.main-info {
+  flex-grow: 1;
+  padding: 12px;
+}
+
+.main-info:hover {
+  background: #f0f7ff;
 }
 </style>
