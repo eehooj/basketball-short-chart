@@ -139,7 +139,10 @@ const deleteGroupRecords = async (baseKey: string, keys: string[]) => {
     
     // 성공한 키와 실패한 에러 필터링
     const failed = results.filter(r => r.status === 'rejected');
-    const successKeys = keys.filter((_, i) => results[i].status === 'fulfilled');
+    const successKeys = keys.filter((_, i) => {
+      const res = results[i];
+      return res && res.status === 'fulfilled';
+    });
 
     // 성공한 데이터 목록 반영
     rawMatches.value = rawMatches.value.filter(k => !successKeys.includes(k));
