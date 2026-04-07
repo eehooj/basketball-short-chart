@@ -134,11 +134,26 @@ const toggleStats = () => isStatsVisible.value = !isStatsVisible.value
 const saveToCloud = async () => {
   if (!matchName.value.trim()) return alert('경기 이름을 입력해주세요!');
 
+  const versionKey = getVersionKey(selectedDate.value || '', matchName.value, saveTag.value);
+
+  // 1. 기존 데이터 존재 여부 확인
+  try {
+    const existingData = await $fetch<ShotData | null>(`/api/get-shots`, { query: { date: versionKey } });
+    
+    // 데이터가 있고, 슛 기록이 하나라도 있다면 덮어쓰기 확인
+    if (existingData && (existingData.leftShots?.length > 0 || existingData.rightShots?.length > 0)) {
+      if (!confirm(`[${versionKey}] 이미 저장된 기록이 있습니다. 덮어씌우시겠습니까?`)) {
+        return; // 사용자가 취소를 누르면 중단
+      }
+    }
+  } catch (e) {
+    // 에러 발생 시(데이터가 없는 경우 등) 무시하고 진행
+    console.log(`기존 데이터 존재 확인 중 문제 발생: ${e}`);
+  }
+
+  // 2. 비밀번호 입력 및 저장 진행
   const password = prompt('비밀번호를 입력해주세요:');
   if (!password) return;
-
-  const dateStr = selectedDate.value || new Date().toISOString().split('T')[0];
-  const versionKey = getVersionKey(dateStr, matchName.value, saveTag.value);
 
   if (leftShots.value.length === 0 && rightShots.value.length === 0) {
     if (!confirm(`[${versionKey}] 현재 기록된 슛이 없습니다. 빈 데이터를 저장하시겠습니까?`)) return;
