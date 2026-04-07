@@ -19,9 +19,17 @@ export default defineEventHandler(async (event) => {
 
     // 2. 프론트엔드에서 보낸 데이터 받기
     const body = await readBody(event);
-    const { date, leftShots, rightShots, players } = body;
+    const { date, leftShots, rightShots, players, password } = body;
 
-    // 3. DB에 저장 (날짜별로 저장됨)
+    // 3. 비밀번호 검증
+    if (config.appPassword && password !== config.appPassword) {
+        throw createError({
+            status: 401,
+            statusText: '비밀번호가 틀렸습니다.',
+        });
+    }
+
+    // 4. DB에 저장 (날짜별로 저장됨)
     await kv.set(`shots:${date}`, {
         leftShots,
         rightShots,

@@ -71,8 +71,7 @@ const fetchShotData = async (key: string): Promise<ShotData | null> => {
   try {
     return await $fetch<ShotData>(`/api/get-shots`, { query: { date: key } });
   } catch (error: any) {
-    console.error('상세 원인:', error);
-
+    console.error(`[Data Fetch Error] Key: ${key}`, error);
     return null;
   }
 };
@@ -93,7 +92,7 @@ const handleAddPlayer = () => {
 const handleRemovePlayer = (name: string) => {
   if (confirm(`${name} 선수를 삭제하시겠습니까?`)) {
     removePlayer(name);
-    if (currentPlayer.value === name) currentPlayer.value = players.value[0] || '';
+    if (currentPlayer.value === name) currentPlayer.value = '';
     isDeleteMode.value = false; // 삭제 후 모드 해제
   }
 };
@@ -135,7 +134,11 @@ const toggleStats = () => isStatsVisible.value = !isStatsVisible.value
 const saveToCloud = async () => {
   if (!matchName.value.trim()) return alert('경기 이름을 입력해주세요!');
 
-  const versionKey = getVersionKey(selectedDate.value || '', matchName.value, saveTag.value);
+  const password = prompt('비밀번호를 입력해주세요:');
+  if (!password) return;
+
+  const dateStr = selectedDate.value || new Date().toISOString().split('T')[0];
+  const versionKey = getVersionKey(dateStr, matchName.value, saveTag.value);
 
   if (leftShots.value.length === 0 && rightShots.value.length === 0) {
     if (!confirm(`[${versionKey}] 현재 기록된 슛이 없습니다. 빈 데이터를 저장하시겠습니까?`)) return;
@@ -148,28 +151,28 @@ const saveToCloud = async () => {
         date: versionKey,
         leftShots: leftShots.value,
         rightShots: rightShots.value,
-        players: players.value
+        players: players.value,
+        password: password
       }
     });
 
     if (res.success) {
       alert(`[${versionKey}] 기록이 저장되었습니다!`);
-      // 저장 후 화면 비우기 확인
       if (confirm(`${saveTag.value} 저장 완료. 다음 기록을 위해 화면을 비울까요?`)) {
         leftShots.value = [];
         rightShots.value = [];
       }
     }
   } catch (error: any) {
-    console.error('저장 실패 상세 원인:', error);
-
-    alert('저장 실패!');
+    const msg = error.statusText || '저장 실패: 비밀번호를 확인해주세요.';
+    alert(msg);
   }
 };
 
 const loadFromCloud = async () => {
   try {
-    const versionKey = getVersionKey(selectedDate.value || '', matchName.value, saveTag.value);
+    const dateStr = selectedDate.value || '';
+    const versionKey = getVersionKey(dateStr, matchName.value, saveTag.value);
     const data = await fetchShotData(versionKey);
 
     if (data) {
@@ -181,9 +184,8 @@ const loadFromCloud = async () => {
       alert('해당 쿼터의 데이터가 없습니다.');
     }
   } catch (error: any) {
-    console.error('데이터 불러오기 실패 상세 원인:', error);
-
-    alert('불러오기 실패!');
+    console.error('[Cloud Load Error]', error);
+    alert('데이터를 불러오는 중 오류가 발생했습니다.');
   }
 };
 
@@ -200,8 +202,7 @@ const onMatchSelected = async (fullKey: string) => {
     await nextTick();
     await loadFromCloud();
   } catch (error: any) {
-    console.error('데이터 불러오기 실패 상세 원인:', error);
-
+    console.error('[Match Selection Error]', error);
     alert("데이터 형식이 올바르지 않습니다.");
   }
 };

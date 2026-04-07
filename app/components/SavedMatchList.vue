@@ -15,13 +15,19 @@ const emit = defineEmits(['select']);
  * 햄버거 메뉴 클릭 시 서버에서 저장된 경기 목록을 가져옵니다.
  */
 const openList = async () => {
+  const password = prompt('비밀번호를 입력해주세요:');
+  if (!password) return;
+
   try {
-    // API 호출 (예: ["2024-04-07-상대편_1쿼터", "2024-04-07-상대편_최종"])
-    rawMatches.value = await $fetch<string[]>('/api/get-list');
+    // API 호출 시 비밀번호 쿼리 파라미터 추가
+    rawMatches.value = await $fetch<string[]>('/api/get-list', {
+      query: { password: password }
+    });
     isVisible.value = true;
-  } catch (error) {
-    console.error('목록 로드 실패:', error);
-    alert('경기 목록을 불러오는 중 오류가 발생했습니다.');
+  } catch (error: any) {
+    console.error('[Match List Fetch Error]', error);
+    const msg = error.statusText || '비밀번호가 틀렸거나 목록을 불러오는 데 실패했습니다.';
+    alert(msg);
   }
 };
 
@@ -165,35 +171,5 @@ const handleSelect = (key: string) => {
 .modal-body {
   overflow-y: auto;
   padding: 15px;
-}
-
-.label.draft {
-  background: #ff9800;
-}
-
-.no-data {
-  text-align: center;
-  padding: 40px 20px;
-  color: #999;
-}
-
-/* 애니메이션 */
-.fade-scale-enter-active, .fade-scale-leave-active {
-  transition: all 0.3s ease;
-}
-.fade-scale-enter-from, .fade-scale-leave-to {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-.slide-fade-enter-active {
-  transition: all 0.2s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter-from, .slide-fade-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
 }
 </style>

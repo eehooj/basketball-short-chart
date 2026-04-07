@@ -7,6 +7,17 @@ export default defineEventHandler(async (event) => {
         token: config.kvRestApiToken,
     });
 
+    // 비밀번호 검증
+    const query = getQuery(event);
+    const password = query.password as string;
+
+    if (config.appPassword && password !== config.appPassword) {
+        throw createError({
+            status: 401,
+            statusText: '비밀번호가 틀렸습니다.',
+        });
+    }
+
     const keys = await kv.keys('shots:*');
 
     // 1. "shots:" 제거된 새로운 배열 생성

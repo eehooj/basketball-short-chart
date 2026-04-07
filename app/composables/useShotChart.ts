@@ -67,17 +67,14 @@ export const useShotChart = () => {
         const dy = Math.abs(y - rimY); // 세로 차이
         const distance = Math.sqrt(dx * dx + dy * dy); // 직선 거리
 
-        // 3. 판정 임계값 (Thresholds) - 이 수치들을 조정해서 감도를 맞춥니다.
-        const ARC_THREE_DISTANCE = 185;  // 정면/윙 3점 거리
-        const CORNER_THREE_DX = 148;     // 코너 직선의 가로 시작점
-        const CORNER_ZONE_DY = 135;      // 코너 직선이 시작되는 세로 높이
+        // 3. 판정 임계값 (Thresholds)
+        const ARC_THREE_DISTANCE = 180;  // 정면/윙 3점 거리 (185에서 180으로 하향)
+        const CORNER_THREE_DY = 175;     // 코너 직선 구간의 수직 거리 기준
 
         let is3Point = false;
 
-        // 우선 전체 거리(반지름)가 180 이상이면 3점으로 간주
-        // 혹은, 코너 직선 구간(dy가 높을 때)에서 가로 거리가 140 이상이면 3점
-        if (distance >= ARC_THREE_DISTANCE
-            || (dy > CORNER_ZONE_DY && dx >= CORNER_THREE_DX)) {
+        // 전체 거리가 185 이상이거나, 사이드 라인쪽 수직 거리(dy)가 175 이상이면 3점
+        if (distance >= ARC_THREE_DISTANCE || dy >= CORNER_THREE_DY) {
             is3Point = true;
         }
 
@@ -111,25 +108,34 @@ export const useShotChart = () => {
         rightShots.value = rightShots.value.filter(s => s.id !== id)
     }
 
-    const toggleStatus = (shot: any) => {
+    const toggleStatus = (shot: BasketballShot) => {
         shot.type = shot.type === 'made' ? 'miss' : 'made'
     }
 
-    const getStats = (data: any[]) => {
+    interface StatsSummary {
+        total: number;
+        made: number;
+        rate: number;
+    }
+
+    const getStats = (data: BasketballShot[]): StatsSummary => {
         const total = data.length
         const made = data.filter(s => s.type === 'made').length
         return { total, made, rate: total > 0 ? Math.round((made / total) * 100) : 0 }
     }
 
-    // 2. 구역별로 쪼개서 리스트를 만드는 로직 (새로 추가)
-    const calculateZoneStats = (shots: any[]) => {
+    interface ZoneStat {
+        name: string;
+        made: number;
+        attempts: number;
+        percentage: number;
+    }
+
+    const calculateZoneStats = (shots: BasketballShot[]): ZoneStat[] => {
         const zones = ["골 밑", "미드레인지", "3점슛"]
 
         return zones.map(zoneName => {
-            // 해당 구역 데이터만 필터링
             const zoneData = shots.filter(s => s.zone === zoneName)
-
-            // 기존 getStats를 재사용해서 수치 계산
             const result = getStats(zoneData)
 
             return {
