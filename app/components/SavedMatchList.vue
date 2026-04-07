@@ -243,11 +243,4 @@ const deleteGroupRecords = async (baseKey: string, keys: string[]) => {
 .delete-item-btn { background: none; border: none; color: #ff5252; cursor: pointer; padding: 5px 10px; font-weight: bold; font-size: 18px; }
 .delete-item-btn:hover { transform: scale(1.2); }
 .no-data { text-align: center; padding: 40px 20px; color: #999; }
-
-/* 애니메이션 */
-.fade-scale-enter-active, .fade-scale-leave-active { transition: all 0.3s ease; }
-.fade-scale-enter-from, .fade-scale-leave-to { opacity: 0; transform: scale(0.9); }
-.slide-fade-enter-active { transition: all 0.2s ease-out; }
-.slide-fade-leave-active { transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1); }
-.slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
 </style>
