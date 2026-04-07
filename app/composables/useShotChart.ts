@@ -39,6 +39,7 @@ export const useShotChart = () => {
         const trimmedName = name.trim()
         if (trimmedName && !players.value.includes(trimmedName)) {
             players.value.push(trimmedName)
+            players.value.sort((a, b) => a.localeCompare(b)); // 가나다/ABC 순 정렬 추가
         }
     }
 
@@ -74,11 +75,9 @@ export const useShotChart = () => {
         let is3Point = false;
 
         // 우선 전체 거리(반지름)가 180 이상이면 3점으로 간주
-        if (distance >= ARC_THREE_DISTANCE) {
-            is3Point = true;
-        }
         // 혹은, 코너 직선 구간(dy가 높을 때)에서 가로 거리가 140 이상이면 3점
-        else if (dy > CORNER_ZONE_DY && dx >= CORNER_THREE_DX) {
+        if (distance >= ARC_THREE_DISTANCE
+            || (dy > CORNER_ZONE_DY && dx >= CORNER_THREE_DX)) {
             is3Point = true;
         }
 

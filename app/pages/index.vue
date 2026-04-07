@@ -70,7 +70,9 @@ const getVersionKey = (date: string, name: string, tag: string) => `${date}-${na
 const fetchShotData = async (key: string): Promise<ShotData | null> => {
   try {
     return await $fetch<ShotData>(`/api/get-shots`, { query: { date: key } });
-  } catch (e) {
+  } catch (error: any) {
+    console.error('상세 원인:', error);
+
     return null;
   }
 };
@@ -78,6 +80,8 @@ const fetchShotData = async (key: string): Promise<ShotData | null> => {
 /**
  * [이벤트 핸들러]
  */
+const isDeleteMode = ref(false); // 삭제 모드 상태 추가
+
 const handleAddPlayer = () => {
   const name = newPlayerName.value.trim();
   if (name) {
@@ -90,6 +94,15 @@ const handleRemovePlayer = (name: string) => {
   if (confirm(`${name} 선수를 삭제하시겠습니까?`)) {
     removePlayer(name);
     if (currentPlayer.value === name) currentPlayer.value = players.value[0] || '';
+    isDeleteMode.value = false; // 삭제 후 모드 해제
+  }
+};
+
+const handlePlayerClick = (name: string) => {
+  if (isDeleteMode.value) {
+    handleRemovePlayer(name);
+  } else {
+    currentPlayer.value = name;
   }
 };
 
@@ -147,7 +160,9 @@ const saveToCloud = async () => {
         rightShots.value = [];
       }
     }
-  } catch (e) {
+  } catch (error: any) {
+    console.error('저장 실패 상세 원인:', error);
+
     alert('저장 실패!');
   }
 };
@@ -165,7 +180,9 @@ const loadFromCloud = async () => {
     } else {
       alert('해당 쿼터의 데이터가 없습니다.');
     }
-  } catch (e) {
+  } catch (error: any) {
+    console.error('데이터 불러오기 실패 상세 원인:', error);
+
     alert('불러오기 실패!');
   }
 };
@@ -182,7 +199,9 @@ const onMatchSelected = async (fullKey: string) => {
 
     await nextTick();
     await loadFromCloud();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('데이터 불러오기 실패 상세 원인:', error);
+
     alert("데이터 형식이 올바르지 않습니다.");
   }
 };
@@ -250,7 +269,7 @@ const onMatchSelected = async (fullKey: string) => {
             <div class="left-group">
               <h3>선수</h3>
               <div class="current-shooter-info">
-                현재 선택: <strong>{{ currentPlayer || '-' }}</strong>
+                {{ isDeleteMode ? '삭제할 선수를 선택하세요' : '현재 선택: ' + (currentPlayer || '-') }}
               </div>
             </div>
 
@@ -259,8 +278,16 @@ const onMatchSelected = async (fullKey: string) => {
                   v-model="newPlayerName"
                   placeholder="이름 입력"
                   @keyup.enter="handleAddPlayer"
+                  style="height: 32px; box-sizing: border-box;"
               />
               <button @click="handleAddPlayer">추가</button>
+              <button
+                  class="btn-delete-mode"
+                  :class="{ 'is-active': isDeleteMode }"
+                  @click="isDeleteMode = !isDeleteMode"
+              >
+                {{ isDeleteMode ? '취소' : '삭제' }}
+              </button>
             </div>
           </div>
 
@@ -271,10 +298,12 @@ const onMatchSelected = async (fullKey: string) => {
                 class="player-item"
             >
               <button
-                  :class="{ active: currentPlayer === name }"
-                  @click="currentPlayer = name"
+                  :class="{ active: currentPlayer === name && !isDeleteMode }"
+                  :style="isDeleteMode ? { border: '1px dashed #ff5252', color: '#ff5252' } : {}"
+                  @click="handlePlayerClick(name)"
               >
                 {{ name }}
+                <span v-if="isDeleteMode" style="margin-left: 5px; font-weight: bold;">×</span>
               </button>
             </div>
           </div>
@@ -314,70 +343,3 @@ const onMatchSelected = async (fullKey: string) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.save-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: flex-end;
-  background: #f4f4f4;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.input-group label {
-  font-size: 12px;
-  font-weight: bold;
-  color: #555;
-}
-
-.date-input, 
-.match-name-input, 
-.save-tag-select {
-  height: 40px; /* 높이 통일 */
-  padding: 0 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box; /* 패딩/테두리 포함 */
-}
-
-.match-name-input {
-  width: 140px;
-}
-
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  /* margin-top 제거하여 정렬 유지 */
-}
-
-.save-btn {
-  height: 40px; /* 높이 통일 */
-  padding: 0 20px;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.save-btn { background-color: #4CAF50; }
-
-.save-btn:hover {
-  opacity: 0.8;
-}
-</style>
