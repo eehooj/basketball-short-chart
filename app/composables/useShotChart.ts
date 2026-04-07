@@ -1,14 +1,14 @@
 import { COURT_CONFIG } from '~/utils/constants'
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { saveBasketballExcel } from '~/utils/excel-utils';
 
-export interface Shot {
+export interface BasketballShot {
     id: number;
     x: number;
     y: number;
     type: 'made' | 'miss';
     side: string;
-    playerName?: string;
+    playerName: string; // optional 대신 필수값으로 변경하여 오류 방지
     newPlayers?: string;
     distance?: number;
     is3Point?: boolean;
@@ -16,8 +16,8 @@ export interface Shot {
 }
 
 export const useShotChart = () => {
-    const leftShots = ref<Shot[]>([])
-    const rightShots = ref<Shot[]>([])
+    const leftShots = ref<BasketballShot[]>([])
+    const rightShots = ref<BasketballShot[]>([])
     const players = ref<string[]>([])
 
     // 초기화 (LocalStorage 로드)
@@ -96,7 +96,7 @@ export const useShotChart = () => {
             id: Date.now(),
             x, y,
             type: isMade ? 'made' : 'miss',
-            playerName: playerName, // 🚩 추가: 현재 선택된 선수 이름 저장
+            playerName: playerName, // 추가: 현재 선택된 선수 이름 저장
             zone: zoneName,
             distance: Math.round(distance),
             is3Point: is3Point,

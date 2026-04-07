@@ -1,93 +1,123 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 
-const isVisible = ref(false);
-const rawMatches = ref<string[]>([]);
-const expandedGroups = ref<string[]>([]); // 열려있는 그룹 관리
+/**
+ * [상태 관리]
+ */
+const isVisible = ref(false);           // 목록 모달 표시 여부
+const rawMatches = ref<string[]>([]);   // 서버에서 받아온 전체 키 목록
+const expandedGroups = ref<string[]>([]); // 현재 펼쳐진 그룹들의 baseKey 목록
 
 const emit = defineEmits(['select']);
 
+/**
+ * [목록 불러오기]
+ * 햄버거 메뉴 클릭 시 서버에서 저장된 경기 목록을 가져옵니다.
+ */
 const openList = async () => {
   try {
+    // API 호출 (예: ["2024-04-07-상대편_1쿼터", "2024-04-07-상대편_최종"])
     rawMatches.value = await $fetch<string[]>('/api/get-list');
     isVisible.value = true;
   } catch (error) {
-    console.error('로드 실패:', error);
+    console.error('목록 로드 실패:', error);
+    alert('경기 목록을 불러오는 중 오류가 발생했습니다.');
   }
 };
 
-// 🚩 핵심: 평면 리스트를 계층 구조로 변환하는 로직
+/**
+ * [Computed - 데이터 그룹화]
+ * 평면 리스트를 { baseKey: { children: ['1쿼터키', ...] } } 구조로 변환
+ */
 const groupedMatches = computed(() => {
-  const groups: Record<string, { main: string; children: string[] }> = {};
+  const groups: Record<string, { children: string[] }> = {};
 
   rawMatches.value.forEach(key => {
-    // 예: "2026-04-06-상대편_1쿼터" -> "2026-04-06-상대편" 추출
-    const baseKey = key.split('_')[0];
-    const isFinal = key.includes('_최종');
+    // "_"를 기준으로 baseKey(날짜-경기명)와 tag(쿼터/연장)를 분리
+    const splitIndex = key.lastIndexOf('_');
+    const baseKey = splitIndex > -1 ? key.substring(0, splitIndex) : key;
 
     if (!groups[baseKey]) {
-      groups[baseKey] = { main: '', children: [] };
+      groups[baseKey] = { children: [] };
     }
-
-    if (isFinal) {
-      groups[baseKey].main = key;
-    } else {
-      groups[baseKey].children.push(key);
-    }
+    groups[baseKey].children.push(key);
   });
 
-  // 자식(쿼터) 순서 정렬
-  Object.values(groups).forEach(g => g.children.sort());
-
-  return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0])); // 최신순 정렬
+  // 그룹 목록을 최신 날짜 순으로 정렬하여 배열로 반환
+  return Object.entries(groups)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([baseKey, group]) => ({
+      baseKey,
+      children: group.children.sort() // 1쿼터, 2쿼터 순 정렬
+    }));
 });
 
+/**
+ * [이벤트 핸들러]
+ */
+// 그룹 펼치기/접기 토글
 const toggleGroup = (baseKey: string) => {
   const index = expandedGroups.value.indexOf(baseKey);
-  if (index > -1) expandedGroups.value.splice(index, 1);
-  else expandedGroups.value.push(baseKey);
+  if (index > -1) {
+    expandedGroups.value.splice(index, 1);
+  } else {
+    expandedGroups.value.push(baseKey);
+  }
 };
 
+// 경기 선택 시 부모 컴포넌트로 전달
 const handleSelect = (key: string) => {
+  if (!key) return;
   emit('select', key);
-  isVisible.value = false;
+  isVisible.value = false; // 모달 닫기
 };
 </script>
 
 <template>
   <div class="match-list-wrapper">
-    <button class="hamburger-btn" @click="openList">☰ 기록 목록</button>
+    <!-- 햄버거 버튼 -->
+    <button class="hamburger-btn" @click="openList" title="저장된 경기 목록 보기">
+      ☰ 기록 목록
+    </button>
 
     <Transition name="fade-scale">
       <div v-if="isVisible" class="modal-overlay" @click.self="isVisible = false">
-        <div class="modal-content">
+        <div class="modal-content match-list-modal">
           <div class="modal-header">
-            <h3>저장된 경기 (그룹별)</h3>
-            <button @click="isVisible = false">✕</button>
+            <h3>저장된 경기 목록</h3>
+            <button class="close-btn" @click="isVisible = false">✕</button>
           </div>
 
           <div class="modal-body">
-            <div v-for="[baseKey, group] in groupedMatches" :key="baseKey" class="match-group">
+            <!-- 저장된 데이터가 없는 경우 -->
+            <div v-if="groupedMatches.length === 0" class="no-data">
+              저장된 경기 기록이 없습니다.
+            </div>
 
-              <div class="group-header" :class="{ 'has-final': group.main }">
-                <div class="main-info" @click="group.main ? handleSelect(group.main) : null">
-                  <span class="label">최종</span>
-                  <span class="name">{{ group.main || baseKey }}</span>
+            <!-- 그룹별 목록 렌더링 -->
+            <div v-for="group in groupedMatches" :key="group.baseKey" class="match-group">
+              <div class="group-header" @click="toggleGroup(group.baseKey)">
+                <!-- 그룹 메인 정보 -->
+                <div class="main-info">
+                  <span class="name">{{ group.baseKey }}</span>
+                  <span class="count">({{ group.children.length }}개 기록)</span>
                 </div>
-                <button v-if="group.children.length > 0"
-                        class="toggle-btn"
-                        @click.stop="toggleGroup(baseKey)">
-                  {{ expandedGroups.includes(baseKey) ? '▲' : '▼' }}
+                
+                <!-- 하위 쿼터 토글 버튼 -->
+                <button class="toggle-btn">
+                  {{ expandedGroups.includes(group.baseKey) ? '▲' : '▼' }}
                 </button>
               </div>
 
+              <!-- 하위 쿼터 목록 -->
               <Transition name="slide-fade">
-                <div v-if="expandedGroups.includes(baseKey)" class="group-children">
+                <div v-if="expandedGroups.includes(group.baseKey)" class="group-children">
                   <div v-for="child in group.children"
                        :key="child"
                        class="child-item"
-                       @click="handleSelect(child)">
-                    <span class="bullet">ㄴ</span> {{ child.split('_')[1] || child }}
+                       @click.stop="handleSelect(child)">
+                    <span class="bullet">ㄴ</span> 
+                    {{ child.split('_')[1] || '기타' }}
                   </div>
                 </div>
               </Transition>
@@ -98,3 +128,72 @@ const handleSelect = (key: string) => {
     </Transition>
   </div>
 </template>
+
+<style scoped>
+/* 컴포넌트 내부 스타일 정돈 */
+.match-list-wrapper {
+  display: inline-block;
+}
+
+.hamburger-btn {
+  height: 40px; /* 높이 통일 */
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-btn:hover {
+  background: #444;
+}
+
+.match-list-modal {
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.label.draft {
+  background: #ff9800;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+/* 애니메이션 */
+.fade-scale-enter-active, .fade-scale-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-scale-enter-from, .fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.slide-fade-enter-active {
+  transition: all 0.2s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from, .slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+</style>
