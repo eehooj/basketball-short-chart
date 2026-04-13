@@ -188,6 +188,10 @@ const executeSaveRequest = async (key: string, pw: string) => {
 const saveToCloud = async () => {
   if (!matchName.value.trim()) return alert('경기 이름을 입력해주세요!');
 
+  if (!saveTag.value || saveTag.value.trim() === '') {
+    return alert('쿼터를 선택해주세요!');
+  }
+
   const versionKey = getVersionKey(selectedDate.value || '', matchName.value, saveTag.value);
 
   // 1. 기존 데이터 확인
@@ -271,7 +275,7 @@ const onGroupSelected = async (baseKey: string, keys: string[]) => {
     
     selectedDate.value = datePart;
     matchName.value = namePart;
-    saveTag.value = '전체합산';
+    saveTag.value = '';
 
     // 2. 모든 키의 데이터를 병합하여 가져오기
     const results = await Promise.all(keys.map(key => fetchShotData(key)));
@@ -424,7 +428,7 @@ const onGroupSelected = async (baseKey: string, keys: string[]) => {
       </div>
 
       <div class="input-group">
-        <label for="save-tag">쿼터/버전</label>
+        <label for="save-tag">쿼터</label>
         <select id="save-tag" v-model="saveTag" class="save-tag-select">
           <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
         </select>
