@@ -13,8 +13,8 @@
 /* 2. 모달 하얀 창 (Content) */
 .modal-content {
     background: white;
-    width: 90%;
-    max-width: 850px;
+    width: 95%;
+    max-width: 1000px; /* 3개의 표를 수용하기 위해 너비 확장 */
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
@@ -35,22 +35,27 @@
 /* 4. 기존 통계 컨테이너 좌우 배치 */
 .stats-container {
     display: flex;
-    gap: 24px;
+    gap: 16px; /* 간격 소폭 조정 */
     justify-content: center;
 }
-.stats-box { flex: 1; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+.stats-box { flex: 1; border: 1px solid #eee; border-radius: 8px; overflow: hidden; min-width: 250px; }
 
 /* 5. 기존 색상 로직 (파스텔톤 유지) */
 .team-label { padding: 12px; text-align: center; font-weight: bold; margin: 0; }
 
 /* HOME (왼쪽/레드) */
-.stats-box:not(.is-right) .team-label {
+.stats-box:not(.is-right):not(.total-stats) .team-label {
     background-color: #ffadad !important;
     color: #444;
 }
 /* AWAY (오른쪽/블루) */
 .stats-box.is-right .team-label {
     background-color: #a0c4ff !important;
+    color: #444;
+}
+/* TOTAL (전체/그린) */
+.stats-box.total-stats .team-label {
+    background-color: #caffbf !important;
     color: #444;
 }
 

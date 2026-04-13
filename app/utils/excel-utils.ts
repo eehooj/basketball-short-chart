@@ -19,8 +19,8 @@ export const saveBasketballExcel = async (players: string[], leftShots: Shot[], 
     };
 
     // 2. 헤더 생성 (2개 행)
-    const headerRow1 = ['선수명', 'Left', '', '', 'Right', '', ''];
-    const headerRow2 = ['', '골 밑', '미드레인지', '3점슛', '골 밑', '미드레인지', '3점슛'];
+    const headerRow1 = ['선수명', 'Left', '', '', 'Right', '', '', 'Total', '', ''];
+    const headerRow2 = ['', '골 밑', '미드레인지', '3점슛', '골 밑', '미드레인지', '3점슛', '골 밑', '미드레인지', '3점슛'];
 
     worksheet.addRow(headerRow1);
     worksheet.addRow(headerRow2);
@@ -29,8 +29,10 @@ export const saveBasketballExcel = async (players: string[], leftShots: Shot[], 
     players.forEach(playerName => {
         const allShots = [...leftShots, ...rightShots].filter(s => s.playerName === playerName);
 
-        const getZoneStat = (side: 'left' | 'right', zone: string) => {
-            const shots = allShots.filter(s => s.side === side && s.zone === zone);
+        // 특정 사이드와 구역의 통계를 계산하는 헬퍼 함수
+        const getZoneStat = (zone: string, side?: 'left' | 'right') => {
+            // side가 있으면 해당 사이드만, 없으면 전체 사이드 필터링
+            const shots = allShots.filter(s => (side ? s.side === side : true) && s.zone === zone);
             const total = shots.length;
             const made = shots.filter(s => s.type === 'made').length;
             const rate = total > 0 ? Math.round((made / total) * 100) : 0;
@@ -39,12 +41,15 @@ export const saveBasketballExcel = async (players: string[], leftShots: Shot[], 
 
         worksheet.addRow([
             playerName,
-            getZoneStat('left', '골 밑'),
-            getZoneStat('left', '미드레인지'),
-            getZoneStat('left', '3점슛'),
-            getZoneStat('right', '골 밑'),
-            getZoneStat('right', '미드레인지'),
-            getZoneStat('right', '3점슛')
+            getZoneStat('골 밑', 'left'),
+            getZoneStat('미드레인지', 'left'),
+            getZoneStat('3점슛', 'left'),
+            getZoneStat('골 밑', 'right'),
+            getZoneStat('미드레인지', 'right'),
+            getZoneStat('3점슛', 'right'),
+            getZoneStat('골 밑'),      // Total: 골 밑
+            getZoneStat('미드레인지'), // Total: 미드레인지
+            getZoneStat('3점슛')       // Total: 3점슛
         ]);
     });
 
@@ -52,6 +57,7 @@ export const saveBasketballExcel = async (players: string[], leftShots: Shot[], 
     worksheet.mergeCells('A1:A2'); // 선수명 세로 병합
     worksheet.mergeCells('B1:D1'); // Left 가로 병합
     worksheet.mergeCells('E1:G1'); // Right 가로 병합
+    worksheet.mergeCells('H1:J1'); // Total 가로 병합
 
     // 5. 전체 스타일 적용
     worksheet.eachRow((row, rowNumber) => {
